@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="so">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Xaraash</title>
+<meta name="description" content="Xaraash: suuqa xayeysiisyada Bariga Afrika oo dhan.">
+<meta name="theme-color" content="#2a6bc2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Xaraash">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Figtree:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;600;700&display=swap">
+<style>
+*,*::before,*::after { box-sizing: border-box; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); color-scheme: light; -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+
+/* Layout: sticky flag-blue masthead, search + post row, category rail, then two columns (filters | listing rows with thumbnail on the right). Stacks to one column on phones. */
+:root {
+  --bg: #edf2f9;
+  --surface: #ffffff;
+  --surface-2: #f5f8fc;
+  --ink: #0f2038;
+  --muted: #5a6a82;
+  --line: #d5dfeb;
+  --brand: #2a6bc2;
+  --brand-ink: #ffffff;
+  --link: #1d5aa8;
+  --chip: #e3edfa;
+  --chip-ink: #174a8c;
+  --cta: #f4b942;
+  --cta-ink: #1c1604;
+  --good: #1b7f5f;
+  --thumb-s: 55%;
+  --thumb-l1: 88%;
+  --thumb-l2: 76%;
+  --thumb-ic: 32%;
+  --ic-s: 62%; --ic-l: 42%; --ct-l: 94%;
+  --shadow: 0 1px 2px rgba(15,32,56,.06), 0 6px 20px rgba(15,32,56,.06);
+  --font-display: "Familjen Grotesk", "Noto Sans Ethiopic", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Figtree", "Noto Sans Ethiopic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --scale: 1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1626; --surface: #12233a; --surface-2: #0f1d31; --ink: #e5edf8; --muted: #93a5bf; --line: #223652;
+    --brand: #123560; --brand-ink: #ffffff; --link: #7db3f5; --chip: #1b3558; --chip-ink: #a9cdf8;
+    --cta: #f4b942; --cta-ink: #1c1604; --good: #4cc79d;
+    --thumb-s: 38%; --thumb-l1: 24%; --thumb-l2: 34%; --thumb-ic: 74%; --ic-s: 70%; --ic-l: 70%; --ct-l: 21%;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1626; --surface: #12233a; --surface-2: #0f1d31; --ink: #e5edf8; --muted: #93a5bf; --line: #223652;
+  --brand: #123560; --brand-ink: #ffffff; --link: #7db3f5; --chip: #1b3558; --chip-ink: #a9cdf8;
+  --cta: #f4b942; --cta-ink: #1c1604; --good: #4cc79d;
+  --thumb-s: 38%; --thumb-l1: 24%; --thumb-l2: 34%; --thumb-ic: 74%; --ic-s: 70%; --ic-l: 70%; --ct-l: 21%;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { font-size: calc(16px * var(--scale)); }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 1rem; line-height: 1.45;
+  min-height: 100%;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--brand); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--cta); outline-offset: 2px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Masthead */
+.mast { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--brand); color: var(--brand-ink); }
+.mast .wrap { display: flex; align-items: center; gap: 10px; padding-block: 10px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 8px; margin-inline-start: auto; font-family: var(--font-display); font-weight: 700; font-size: 1.7rem; letter-spacing: -.02em; line-height: 1; }
+.logo svg { width: 22px; height: 22px; fill: #fff; flex: none; }
+.pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.14); border: 0; color: var(--brand-ink); border-radius: 10px; padding: 8px 12px; font-weight: 600; }
+.pill:hover { background: rgba(255,255,255,.24); }
+.pill svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.seg { display: inline-flex; background: rgba(255,255,255,.14); border-radius: 10px; padding: 3px; }
+.seg button { background: transparent; border: 0; color: var(--brand-ink); padding: 5px 10px; border-radius: 8px; font-weight: 600; font-size: .88rem; }
+.seg button[aria-pressed="true"] { background: #fff; color: #123560; }
+
+/* Search row */
+.tagline { margin: 22px 0 0; font-family: var(--font-display); font-weight: 600; font-size: 1.3rem; letter-spacing: -.01em; text-wrap: balance; }
+.find { display: flex; gap: 10px; padding-block: 12px 14px; }
+.search { flex: 1; min-width: 0; display: flex; align-items: center; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding-inline: 16px; gap: 10px; }
+.search svg { width: 20px; height: 20px; stroke: var(--link); fill: none; stroke-width: 2; stroke-linecap: round; flex: none; }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 15px 0; font-size: 1.05rem; outline: none; }
+.search:focus-within { outline: 3px solid var(--cta); }
+.search input::placeholder { color: var(--muted); }
+.post { background: var(--cta); color: var(--cta-ink); border: 0; border-radius: 14px; padding: 0 22px; font-weight: 700; font-family: var(--font-display); font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.post:hover { filter: brightness(.96); }
+
+/* Category rail */
+.rail { display: flex; gap: 6px; overflow-x: auto; padding-block: 6px 12px; scrollbar-width: thin; }
+.cat { flex: none; width: 96px; display: flex; flex-direction: column; align-items: center; gap: 6px; background: transparent; border: 0; border-radius: 14px; padding: 10px 6px; color: var(--link); font-weight: 600; font-size: .9rem; }
+.cat .ct { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: hsl(var(--h) 80% var(--ct-l)); font-style: normal; transition: transform .15s ease; }
+.cat:hover .ct { transform: translateY(-2px); }
+.cat svg { width: 30px; height: 30px; stroke: hsl(var(--h) var(--ic-s) var(--ic-l)); fill: hsl(var(--h) var(--ic-s) var(--ic-l) / .18); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.cat span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat:hover { background: var(--surface-2); }
+.cat[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow); color: var(--ink); }
+.cat[aria-pressed="true"] .ct { box-shadow: 0 0 0 3px var(--cta); }
+
+/* Market */
+.market { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; padding-block: 8px 40px; align-items: start; }
+.side { display: flex; flex-direction: column; gap: 18px; }
+.group h3 { margin: 0 0 8px; font-family: var(--font-display); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-weight: 600; font-size: .92rem; color: var(--ink); }
+.tag:hover { border-color: var(--link); }
+.tag[aria-pressed="true"] { background: var(--chip); border-color: var(--link); color: var(--chip-ink); }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.sel { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; background: var(--surface); }
+.sel svg { width: 18px; height: 18px; stroke: var(--link); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.sel select { border: 0; background: transparent; padding: 10px 4px; font-weight: 600; color: var(--link); outline: none; min-width: 0; max-width: 160px; }
+.sel select option { color: #0f2038; background: #fff; }
+.chipbtn { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-weight: 600; color: var(--link); }
+.chipbtn[aria-pressed="true"] { background: var(--chip); border-color: var(--link); color: var(--chip-ink); }
+.count { margin-inline-start: auto; color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+
+.list { display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 124px; gap: 16px; background: var(--surface); border-radius: 16px; padding: 12px 12px 12px 18px; box-shadow: var(--shadow); }
+.row.mine { outline: 2px solid var(--cta); }
+.row .body { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-width: 0; padding-block: 4px; }
+.row h2 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; line-height: 1.25; color: var(--link); text-wrap: balance; overflow-wrap: anywhere; }
+.meta { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; color: var(--muted); font-size: .9rem; }
+.meta span { display: inline-flex; align-items: center; gap: 5px; }
+.meta svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.av { width: 22px; height: 22px; border-radius: 50%; background: var(--chip); color: var(--chip-ink); display: inline-grid; place-items: center; font-size: .72rem; font-weight: 700; }
+.price { margin-inline-start: auto; background: var(--chip); color: var(--chip-ink); font-weight: 700; border-radius: 999px; padding: 5px 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.price.neg { background: transparent; color: var(--muted); font-weight: 500; }
+.price { display: inline-flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
+.thumb { aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(140deg, hsl(var(--h) var(--thumb-s) var(--thumb-l1)), hsl(calc(var(--h) + 18) var(--thumb-s) var(--thumb-l2))); color: hsl(var(--h) 50% var(--thumb-ic)); }
+.thumb svg { width: 52%; height: 52%; stroke: currentColor; fill: currentColor; fill-opacity: .16; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.empty { text-align: center; color: var(--muted); padding: 48px 16px; background: var(--surface); border-radius: 16px; }
+.morewrap { display: flex; justify-content: center; padding-top: 18px; }
+.ghost { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 28px; font-weight: 700; color: var(--link); }
+.ghost:hover { border-color: var(--link); }
+
+/* Footer */
+.foot { background: var(--surface-2); border-top: 1px solid var(--line); }
+.apps { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding-block: 32px 8px; }
+.appbtn { display: flex; flex-direction: row; align-items: center; gap: 10px; text-align: start; background: #0b0b0c; color: #fff; border: 1px solid #3a3a3d; border-radius: 10px; padding: 8px 18px 8px 16px; line-height: 1.1; min-width: 150px; }
+.appbtn svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.appbtn span { display: flex; flex-direction: column; }
+.appbtn small { font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+.appbtn b { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; }
+.langline { text-align: center; color: var(--muted); font-size: .9rem; padding-bottom: 22px; }
+.strip { background: var(--cta); color: var(--cta-ink); border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; }
+.strip b { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.strip span { font-weight: 500; }
+.links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 32px; padding-block: 28px; }
+.linkbtn { background: transparent; border: 0; padding: 8px 0; text-align: start; color: var(--link); font-weight: 600; }
+.linkbtn { display: flex; align-items: center; gap: 12px; }
+.linkbtn svg { width: 22px; height: 22px; flex: none; stroke: hsl(210 var(--ic-s) var(--ic-l)); fill: hsl(210 var(--ic-s) var(--ic-l) / .16); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.linkbtn:hover span { text-decoration: underline; }
+.low { display: flex; align-items: center; justify-content: flex-end; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-block: 22px; }
+.soc { display: flex; gap: 10px; flex-wrap: wrap; }
+.soc button { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--surface); color: var(--link); font-weight: 700; font-family: var(--font-display); box-shadow: var(--shadow); }
+.fs { display: flex; gap: 10px; }
+.fs button { border: 1px solid var(--link); background: transparent; color: var(--link); border-radius: 12px; min-width: 52px; padding: 10px 14px; font-weight: 700; }
+.legal { text-align: center; color: var(--muted); font-size: .85rem; padding-block: 6px 36px; }
+
+/* Post dialog + toast */
+.veil { position: fixed; inset: 0; z-index: 40; background: rgba(8,16,30,.6); display: grid; place-items: center; padding: 16px; }
+.sheet { width: min(480px, 100%); max-height: 100%; overflow: auto; background: var(--surface); border-radius: 20px; padding: 22px; box-shadow: var(--shadow); }
+.sheet h2 { margin: 0 0 14px; font-family: var(--font-display); font-size: 1.4rem; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-weight: 600; font-size: .9rem; }
+.field input, .field select { border: 1px solid var(--line); background: var(--surface-2); border-radius: 10px; padding: 11px 12px; font-weight: 500; }
+.acts { display: flex; gap: 10px; justify-content: flex-end; padding-top: 6px; }
+.acts .post { padding: 12px 22px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 50; background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-weight: 600; max-width: calc(100% - 32px); box-shadow: var(--shadow); }
+
+
+/* Language droplist, currency, chat, app tab bar */
+.langsel { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.14); border-radius: 10px; padding: 0 6px 0 10px; color: var(--brand-ink); }
+.langsel svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; flex: none; }
+.langsel select { background: transparent; border: 0; color: inherit; font-weight: 600; padding: 9px 4px; outline: none; max-width: 130px; }
+.langsel select option { color: #0f2038; background: #fff; }
+.langsel:focus-within { outline: 3px solid var(--cta); }
+.price small { display: block; font-weight: 500; font-size: .72rem; opacity: .8; text-align: end; }
+.pricerow { display: flex; gap: 8px; }
+.pricerow input { flex: 1; min-width: 0; }
+.conv { color: var(--muted); font-weight: 500; min-height: 1.2em; font-variant-numeric: tabular-nums; }
+.legal.rl { padding-block: 0 10px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.chatfab { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 25; width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--cta); color: var(--cta-ink); box-shadow: var(--shadow); display: grid; place-items: center; }
+.chatfab svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.chat { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(88px + env(safe-area-inset-bottom, 0px)); width: min(380px, calc(100% - 32px)); height: min(540px, calc(100% - 150px)); z-index: 35; background: var(--surface); border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,.3); display: flex; flex-direction: column; overflow: hidden; }
+.chat header { background: var(--brand); color: var(--brand-ink); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-family: var(--font-display); font-size: 1.05rem; }
+.chat header button { background: none; border: 0; color: inherit; font-size: 1.6rem; line-height: 1; padding: 0 4px; }
+.msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.msg { max-width: 86%; padding: 9px 13px; border-radius: 14px; overflow-wrap: anywhere; }
+.msg.bot { background: var(--surface-2); align-self: flex-start; }
+.msg.me { background: var(--brand); color: var(--brand-ink); align-self: flex-end; }
+.quick { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 14px 8px; }
+.quick button { background: var(--chip); color: var(--chip-ink); border: 0; border-radius: 999px; padding: 6px 12px; font-size: .82rem; font-weight: 600; }
+.chat form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+.chat input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--surface-2); }
+.chat .post { padding: 0 16px; border-radius: 12px; font-size: .95rem; }
+.tabbar { display: none; }
+@media (max-width: 720px) {
+  body { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid var(--line); padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+  .tabbar button { background: none; border: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: .7rem; font-weight: 600; color: var(--muted); padding: 4px 0; min-width: 0; }
+  .tabbar button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tabbar svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tabbar .mid i { width: 48px; height: 48px; border-radius: 50%; background: var(--cta); color: var(--cta-ink); display: grid; place-items: center; margin-top: -20px; box-shadow: var(--shadow); }
+  .chatfab { display: none; }
+  .chat { right: 8px; left: 8px; width: auto; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); height: min(70vh, calc(100% - 110px)); }
+  .toast { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+  .find .post { display: none; }
+}
+
+/* Detail + info pages */
+.tlink { background: none; border: 0; padding: 0; text-align: start; color: inherit; font: inherit; cursor: pointer; }
+.tlink:hover { text-decoration: underline; }
+.row { cursor: pointer; }
+.back { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--surface); border: 0; box-shadow: var(--shadow); color: var(--link); margin-block: 20px 12px; }
+.back svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.crumbs { color: var(--muted); font-size: .88rem; margin-bottom: 12px; overflow-wrap: anywhere; }
+.dgrid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; padding-bottom: 44px; align-items: start; }
+.panel { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 24px; min-width: 0; }
+.panel h1 { margin: 0 0 12px; font-family: var(--font-display); font-size: 1.8rem; line-height: 1.18; color: var(--link); text-wrap: balance; overflow-wrap: anywhere; }
+.panel h2 { margin: 26px 0 8px; font-family: var(--font-display); font-size: 1.2rem; }
+.panel p { margin: 0 0 10px; max-width: 68ch; }
+.panel ul, .panel ol { margin: 0 0 10px; padding-inline-start: 22px; max-width: 68ch; display: flex; flex-direction: column; gap: 6px; }
+.lead { color: var(--muted); font-size: 1.08rem; }
+.big { aspect-ratio: 4 / 3; max-width: 100%; border-radius: 14px; margin-block: 16px; }
+.big svg { width: 26%; height: 26%; }
+.specs { display: grid; grid-template-columns: auto 1fr; gap: 8px 22px; margin: 16px 0; }
+.specs dt { color: var(--muted); }
+.specs dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.btnrow { display: flex; gap: 10px; flex-wrap: wrap; margin-block: 14px; }
+.tip { background: var(--chip); color: var(--chip-ink); border-radius: 12px; padding: 12px 14px; font-size: .92rem; margin-top: 14px; }
+.tip button { background: none; border: 0; padding: 0; color: inherit; font-weight: 700; text-decoration: underline; }
+.sim { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sim button { background: var(--surface-2); border: 0; border-radius: 12px; padding: 8px; text-align: start; font-weight: 600; font-size: .85rem; color: var(--ink); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sim .thumb { width: 100%; }
+.sim span { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.doc { max-width: 860px; margin-inline: auto; }
+.pchips { display: flex; gap: 8px; flex-wrap: wrap; margin-block: 14px; }
+.pchips span { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 7px 16px; font-weight: 600; }
+.pchips i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.loginbox { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--chip); color: var(--chip-ink); border-radius: 14px; padding: 12px 16px; font-weight: 600; max-width: 520px; }
+.loginbox button { background: var(--surface); border: 0; border-radius: 10px; padding: 8px 16px; font-weight: 700; color: var(--link); }
+.eg { color: var(--muted); font-size: .88rem; margin-top: 18px; }
+
+@media (max-width: 860px) {
+  .dgrid { grid-template-columns: minmax(0, 1fr); }
+  .panel h1 { font-size: 1.5rem; }
+  .market { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .side { flex-direction: row; overflow-x: auto; gap: 18px; padding-bottom: 4px; }
+  .group { flex: none; }
+  .tags { flex-wrap: nowrap; }
+  .tag { white-space: nowrap; }
+  .links { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .row { grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; padding-left: 14px; }
+  .row h2 { font-size: 1.02rem; }
+  .post .lbl { display: none; }
+  .post { padding: 0 18px; }
+  .logo { font-size: 1.45rem; }
+  .cat { width: 80px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .row { transition: transform .15s ease; }
+  .row:hover { transform: translateY(-1px); }
+}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <button class="pill" id="loginBtn" type="button"><svg viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4M10 8l4 4-4 4M14 12H3"/></svg><span data-i="login"></span></button>
+    <label class="langsel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><select id="langSel" aria-label="Language"><option value="so">Soomaali</option><option value="en">English</option><option value="sw">Kiswahili</option><option value="am">አማርኛ</option><option value="fr">Français</option></select></label>
+    <button class="pill" id="themeBtn" type="button" aria-label="Theme"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></svg></button>
+    <div class="logo" aria-label="Xaraash"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5l2.9 7.6 8.1.4-6.3 5.1 2.1 7.9L12 17.9 5.2 22.5l2.1-7.9L1 9.5l8.1-.4z"/></svg>Xaraash</div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap" id="viewHome">
+    <p class="tagline" data-i="tagline"></p>
+    <div class="find">
+      <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" data-ip="search" autocomplete="off"></label>
+      <button class="post" id="addBtn" type="button"><span class="lbl" data-i="add"></span><span aria-hidden="true">+</span></button>
+    </div>
+    <nav class="rail" id="rail" aria-label="Categories"></nav>
+
+    <div class="market">
+      <aside class="side" id="side"></aside>
+      <section aria-live="polite">
+        <div class="bar">
+          <label class="sel"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><select id="region" aria-label="Region"></select></label>
+          <button class="chipbtn" id="sortNew" type="button" aria-pressed="true" data-i="new"></button>
+          <button class="chipbtn" id="sortCheap" type="button" aria-pressed="false" data-i="cheap"></button>
+          <label class="sel"><select id="cur" aria-label="Currency"></select></label>
+          <span class="count" id="count"></span>
+        </div>
+        <ul class="list" id="list"></ul>
+        <div class="morewrap"><button class="ghost" id="moreBtn" type="button" data-i="more"></button></div>
+      </section>
+    </div>
+  </div>
+  <div class="wrap" id="viewDetail" hidden></div>
+  <div class="wrap" id="viewPage" hidden></div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="apps">
+      <button class="appbtn" type="button" data-soon><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl1"></small><b>App Store</b></span></button>
+      <button class="appbtn" type="button" data-soon><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl2"></small><b>Google Play</b></span></button>
+      <button class="appbtn" type="button" data-soon><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl3"></small><b>AppGallery</b></span></button>
+    </div>
+    <p class="langline" data-i="applangs"></p>
+    <div class="strip"><b data-i="stripA"></b><span data-i="stripB"></span></div>
+    <div class="links" id="links"></div>
+    <div class="low">
+      <div class="fs"><button type="button" id="fsUp" aria-label="Bigger text">+A</button><button type="button" id="fsDown" aria-label="Smaller text">-A</button></div>
+    </div>
+    <p class="legal rl" id="ratesLine"></p>
+    <p class="legal"><span data-i="legal"></span><br><span data-i="sample"></span></p>
+  </div>
+</footer>
+
+<div class="veil" id="veil" hidden>
+  <form class="sheet" id="postForm" role="dialog" aria-modal="true" aria-labelledby="pf-h">
+    <h2 id="pf-h" data-i="add"></h2>
+    <label class="field"><span data-i="fTitle"></span><input id="pf-title" required maxlength="80"></label>
+    <label class="field"><span data-i="fCat"></span><select id="pf-cat"></select></label>
+    <label class="field"><span data-i="fCity"></span><select id="pf-city"></select></label>
+    <div class="field"><span data-i="fPrice"></span><div class="pricerow"><input id="pf-price" type="number" min="0" step="any" inputmode="decimal" aria-label="Price"><select id="pf-cur" aria-label="Currency"></select></div><small class="conv" id="pf-conv"></small></div>
+    <div class="acts"><button type="button" class="ghost" id="pf-cancel" data-i="cancel"></button><button type="submit" class="post" data-i="publish"></button></div>
+  </form>
+</div>
+<button class="chatfab" id="chatFab" type="button" aria-label="Chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg></button>
+<section class="chat" id="chat" hidden role="dialog" aria-labelledby="chatTitle">
+  <header><b id="chatTitle" data-i="botTitle"></b><button id="chatClose" type="button" aria-label="Close">×</button></header>
+  <div class="msgs" id="msgs" aria-live="polite"></div>
+  <div class="quick" id="quick"></div>
+  <form id="chatForm"><input id="chatIn" data-ip="botPh" autocomplete="off" aria-label="Message"><button class="post" type="submit" data-i="botSend"></button></form>
+</section>
+<nav class="tabbar" id="tabbar" aria-label="App">
+  <button type="button" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg><span data-i="navHome"></span></button>
+  <button type="button" data-tab="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span data-i="navSearch"></span></button>
+  <button type="button" data-tab="add" class="mid" aria-label="Add"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i></button>
+  <button type="button" data-tab="chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg><span data-i="navChat"></span></button>
+  <button type="button" data-tab="login"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span data-i="login"></span></button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var ICON = {
+    all: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    cars: '<path d="M4 16l1.6-5.2A2 2 0 017.5 9.4h9a2 2 0 011.9 1.4L20 16"/><rect x="3" y="16" width="18" height="3.5" rx="1"/><circle cx="7.5" cy="17.7" r=".6"/><circle cx="16.5" cy="17.7" r=".6"/>',
+    devices: '<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20"/>',
+    real: '<path d="M5 21V6l7-3 7 3v15M9 9h2M13 9h2M9 13h2M13 13h2M10 21v-4h4v4"/>',
+    furniture: '<path d="M5 12V9a2 2 0 012-2h10a2 2 0 012 2v3"/><rect x="2.5" y="12" width="19" height="5.5" rx="2"/><path d="M5 17.5V20M19 17.5V20"/>',
+    services: '<path d="M14.7 6.3a4 4 0 005.5 5.5L11 21l-4-4z"/><path d="M13 4l2 2"/>',
+    fashion: '<path d="M8 4L3 8l2 3 3-1v10h8V10l3 1 2-3-5-4a4 4 0 01-8 0z"/>',
+    animals: '<path d="M12 13.5c-3 0-5 2.2-5 4.3 0 1.6 1.6 2 5 2s5-.4 5-2c0-2.1-2-4.3-5-4.3z"/><circle cx="6" cy="10" r="1.6"/><circle cx="10" cy="6.5" r="1.6"/><circle cx="14" cy="6.5" r="1.6"/><circle cx="18" cy="10" r="1.6"/>',
+    jobs: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 13h18"/>',
+    games: '<rect x="2" y="8" width="20" height="10" rx="5"/><path d="M7 11v4M5 13h4"/><circle cx="16" cy="12" r=".8"/><circle cx="18.2" cy="14" r=".8"/>',
+    coaching: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5v4.5c3 2 9 2 12 0v-4.5"/>',
+    food: '<path d="M4 11h16a8 8 0 01-16 0z"/><path d="M8 6c0 2 2 2 2 4M13 6c0 2 2 2 2 4"/>',
+    gardens: '<path d="M12 21v-9M12 12C12 7 8 4 4 4c0 5 3 8 8 8zM12 14c0-4 3-7 8-7 0 4-3 7-8 7z"/>',
+    tourism: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+    trips: '<path d="M3 13l18-8-5 15-4-6z"/><path d="M12 14l-1 6"/>',
+    events: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    arts: '<path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.2.2-2.3 1.5-2.3H17a4 4 0 004-4c0-5-4-9.5-9-9.5z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="11" r="1"/>',
+    coding: '<path d="M8 8l-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"/>',
+    lost: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v3.5M11 14v.5"/>',
+    projects: '<path d="M4 20V9M10 20V4M16 20v-8M22 20H2"/>',
+    l0: '<circle cx="9" cy="8" r="4"/><path d="M2 21c.8-4 3.5-6 7-6s6.2 2 7 6M19 8v6M16 11h6"/>',
+    l1: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    l2: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M15 10h3M15 13h3"/>',
+    l3: '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+    l4: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17v.2"/>',
+    l5: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/>',
+    l6: '<circle cx="9" cy="12" r="6"/><path d="M15 6.3a6 6 0 010 11.4M9 9v6M7.5 10.5h3"/>',
+    l7: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>',
+    l8: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>',
+    l9: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+    l10: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+    l11: '<circle cx="12" cy="9" r="5"/><path d="M8.5 13L7 21l5-3 5 3-1.5-8"/>',
+    l12: '<path d="M3 4h2.5l2 11h10l2-8H7"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>',
+    l13: '<path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6L12 16.7 6.6 19.6l1.1-6L3.2 9.4l6.1-.8z"/>',
+    l14: '<path d="M7 11V5.5a1.5 1.5 0 013 0V10M10 10V4a1.5 1.5 0 013 0v6M13 10V5a1.5 1.5 0 013 0v7M16 12V8.5a1.5 1.5 0 013 0V15c0 4-2.5 6-6 6s-5-1.5-6.5-4L4 13.5a1.5 1.5 0 012.4-1.7L7.5 13"/>',
+    l15: '<circle cx="12" cy="12" r="9"/><path d="M14.8 9.5a3.5 3.5 0 100 5"/>',
+    dl: '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>'
+  };
+  var HUE = { all: 210, cars: 215, devices: 255, real: 160, furniture: 28, services: 190, fashion: 330, animals: 95, jobs: 40, games: 275, coaching: 175, food: 10, gardens: 130, tourism: 200, trips: 235, events: 300, arts: 345, coding: 225, lost: 55, projects: 150 };
+  var CATS = ['all','cars','devices','real','furniture','services','fashion','animals','jobs','games','coaching','food','gardens','tourism','trips','events','arts','coding','lost','projects'];
+  var COUNTRIES = [
+    { n: ['Soomaaliya', 'Somalia', 'Somalia', 'ሶማሊያ', 'Somalie'], c: ['Muqdisho','Hargeysa','Kismaayo','Garoowe','Baydhabo','Boosaaso','Burco'] },
+    { n: ['Kenya', 'Kenya', 'Kenya', 'ኬንያ', 'Kenya'], c: ['Nairobi','Mombasa','Kisumu','Garissa'] },
+    { n: ['Tansaaniya', 'Tanzania', 'Tanzania', 'ታንዛኒያ', 'Tanzanie'], c: ['Dar es Salaam','Dodoma','Arusha','Zanzibar'] },
+    { n: ['Ugaanda', 'Uganda', 'Uganda', 'ዩጋንዳ', 'Ouganda'], c: ['Kampala','Entebbe'] },
+    { n: ['Itoobiya', 'Ethiopia', 'Ethiopia', 'ኢትዮጵያ', 'Éthiopie'], c: ['Addis Ababa','Dire Dawa','Jigjiga'] },
+    { n: ['Jabuuti', 'Djibouti', 'Djibouti', 'ጅቡቲ', 'Djibouti'], c: ['Djibouti'] },
+    { n: ['Rwanda', 'Rwanda', 'Rwanda', 'ሩዋንዳ', 'Rwanda'], c: ['Kigali'] }
+  ];
+  var CITIES = COUNTRIES.reduce(function (a, k) { return a.concat(k.c); }, []);
+  function cityOpts(sel) {
+    var li = LI();
+    return COUNTRIES.map(function (k) {
+      return '<optgroup label="' + esc(k.n[li]) + '">' + k.c.map(function (c) { return '<option' + (sel === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</optgroup>';
+    }).join('');
+  }
+
+  var T = {
+    so: {
+      login: 'Gal', search: 'Raadi alaab, gawaari, guri…', add: 'Soo dir xayeysiis', region: 'Gobolka', allRegions: 'Dhammaan magaalooyinka',
+      'new': 'Cusub', cheap: 'Qiimo yar', more: 'Tusi dheeraad', count: '{n} xayeysiis', none: 'Xayeysiis la mid ah lama helin. Isku day erey kale.',
+      neg: 'Is waafaji', now: 'hadda', mAgo: '{n} daq', hAgo: '{n} saac', you: 'Adiga',
+      cat: { all:'Hoyga', cars:'Gawaarida', devices:'Aaladaha', real:'Guryo & Dhul', furniture:'Alaab-guri', services:'Adeegyo', fashion:'Dhar', animals:'Xoolo', jobs:'Shaqo', games:'Ciyaaro', coaching:'Tababar', food:'Cuntada', gardens:'Beero & ubax', tourism:'Dalxiis', trips:'Safar', events:'Munaasabado', arts:'Farshaxan', coding:'Barnaamij', lost:'Lumay & la helay', projects:'Mashaariic' },
+      gBrands: 'Calaamadaha gawaarida', gTypes: 'Nooca gawaarida', gDev: 'Calaamadaha aaladaha', gAnimals: 'Nooca xoolaha', gReal: 'Nooca guryaha',
+      tg: { parts:'Qaybaha', trucks:'Baabuur & rootooyin', moto:'Mootooyin', classic:'Kuwa hore', crashed:'Burbursan', lease:'Kiro', sheep:'Ido', goat:'Riyo', camel:'Geel', cow:'Lo’', horse:'Fardo', cat:'Bisado', chicken:'Digaag', land:'Dhul iib ah', house:'Guryo iib ah', rent:'Guryo kiro ah', shop:'Dukaamo' },
+      dl1: 'Ka soo deg', dl2: 'Ka hel', dl3: 'Ka baar', applangs: 'App-ka Xaraash: Soomaali · English · Kiswahili · አማርኛ · Français',
+      tagline: 'Xaraash, suuqa Bariga Afrika oo dhan', stripA: 'Iibso, iibi, kala xiriir.', stripB: 'Suuq furan oo ka dhex shaqeeya Soomaaliya, Kenya, Tansaaniya, Ugaanda, Itoobiya, Jabuuti iyo Rwanda.', 
+      fTitle: 'Cinwaanka xayeysiiska', fCat: 'Qaybta', fCity: 'Magaalada', fPrice: 'Qiimaha (ikhtiyaari)', cancel: 'Jooji', publish: 'Daabac',
+      added: 'Xayeysiiskaaga waxaa lagu daray bogga kaliya. Ma la keydin.', soon: 'Qaybtan way soo socotaa.', loginSoon: 'Gelitaanka way soo socotaa.',
+      legal: 'Xaraash · Nooca 0.1 · 2026-10-20', sample: 'Xayeysiisyada hoose waa tusaalayaal, ma aha kuwo dhab ah.',
+      links: ['Isdiiwaangeli','Kordhi aragtida xayeysiiska','Shatiga','Dhimis','Su’aalaha','Nala soo xiriir','Komishanka bogga','Shuruudaha & xaaladaha','Xarunta badbaadada','Akoonno & lambarro la hakiyay','Siyaasadda gaarka ah','Xubinnimada iibiyeyaasha','Adeegga iibsiga aaminka ah','Qiimeyn','Alaabta mamnuuc ah','Siyaasadda hantida maskaxda']
+    },
+    en: {
+      login: 'Login', search: 'Search for cars, phones, homes…', add: 'Add Post', region: 'Region', allRegions: 'All cities',
+      'new': 'New', cheap: 'Lowest price', more: 'Show more', count: '{n} posts', none: 'No matching posts. Try another word.',
+      neg: 'Negotiable', now: 'now', mAgo: '{n}m', hAgo: '{n}h', you: 'You',
+      cat: { all:'Home', cars:'Cars', devices:'Devices', real:'Real estate', furniture:'Furniture', services:'Services', fashion:'Fashion', animals:'Animals', jobs:'Jobs', games:'Games', coaching:'Coaching', food:'Food', gardens:'Gardens', tourism:'Tourism', trips:'Trips', events:'Events', arts:'Arts', coding:'Coding', lost:'Lost & found', projects:'Projects' },
+      gBrands: 'Car makes', gTypes: 'Vehicle types', gDev: 'Device brands', gAnimals: 'Animal types', gReal: 'Property types',
+      tg: { parts:'Parts', trucks:'Trucks & vans', moto:'Motorcycles', classic:'Classic', crashed:'Crashed', lease:'For lease', sheep:'Sheep', goat:'Goats', camel:'Camels', cow:'Cattle', horse:'Horses', cat:'Cats', chicken:'Chickens', land:'Land for sale', house:'Houses for sale', rent:'For rent', shop:'Shops' },
+      dl1: 'Download on the', dl2: 'Get it on', dl3: 'Explore it on', applangs: 'Xaraash app: Soomaali · English · Kiswahili · አማርኛ · Français',
+      tagline: 'Xaraash, the marketplace for all of East Africa', stripA: 'Buy, sell, connect.', stripB: 'An open market across Somalia, Kenya, Tanzania, Uganda, Ethiopia, Djibouti and Rwanda.',
+      fTitle: 'Post title', fCat: 'Category', fCity: 'City', fPrice: 'Price (optional)', cancel: 'Cancel', publish: 'Publish',
+      added: 'Your post was added to this page only. It is not saved.', soon: 'This section is coming soon.', loginSoon: 'Login is coming soon.',
+      legal: 'Xaraash · Version 0.1 · 2026-10-20', sample: 'The posts below are examples, not real listings.',
+      links: ['Register','Increase ad views','License','Discount','FAQ','Contact','Website commission','Terms & conditions','Safety center','Suspended accounts and numbers','Privacy policy','Dealer & agency membership','Trusted purchase service','Rating','Prohibited items','Intellectual property policy']
+    },
+    sw: {
+      login: 'Ingia', search: 'Tafuta magari, simu, nyumba…', add: 'Weka tangazo', region: 'Mkoa', allRegions: 'Miji yote',
+      'new': 'Mpya', cheap: 'Bei nafuu', more: 'Onyesha zaidi', count: 'Matangazo {n}', none: 'Hakuna tangazo linalolingana. Jaribu neno lingine.',
+      neg: 'Bei ya mazungumzo', now: 'sasa', mAgo: 'dk {n}', hAgo: 'saa {n}', you: 'Wewe',
+      cat: { all:'Nyumbani', cars:'Magari', devices:'Vifaa', real:'Mali isiyohamishika', furniture:'Samani', services:'Huduma', fashion:'Mitindo', animals:'Wanyama', jobs:'Ajira', games:'Michezo', coaching:'Mafunzo', food:'Chakula', gardens:'Bustani', tourism:'Utalii', trips:'Safari', events:'Matukio', arts:'Sanaa', coding:'Uprogramu', lost:'Vilivyopotea', projects:'Miradi' },
+      gBrands: 'Chapa za magari', gTypes: 'Aina za magari', gDev: 'Chapa za vifaa', gAnimals: 'Aina za wanyama', gReal: 'Aina za mali',
+      tg: { parts:'Vipuri', trucks:'Malori & vani', moto:'Pikipiki', classic:'Ya zamani', crashed:'Yaliyoharibika', lease:'Kukodisha', sheep:'Kondoo', goat:'Mbuzi', camel:'Ngamia', cow:'Ng’ombe', horse:'Farasi', cat:'Paka', chicken:'Kuku', land:'Ardhi inauzwa', house:'Nyumba zinauzwa', rent:'Za kupangisha', shop:'Maduka' },
+      dl1: 'Pakua kwenye', dl2: 'Pata kwenye', dl3: 'Gundua kwenye', applangs: 'Programu ya Xaraash: Soomaali · English · Kiswahili · አማርኛ · Français',
+      tagline: 'Xaraash, soko la Afrika Mashariki yote', stripA: 'Nunua, uza, ungana.', stripB: 'Soko huru kote Somalia, Kenya, Tanzania, Uganda, Ethiopia, Djibouti na Rwanda.',
+      fTitle: 'Kichwa cha tangazo', fCat: 'Kategoria', fCity: 'Mji', fPrice: 'Bei (hiari)', cancel: 'Ghairi', publish: 'Chapisha',
+      added: 'Tangazo lako limeongezwa kwenye ukurasa huu tu. Halijahifadhiwa.', soon: 'Sehemu hii inakuja hivi karibuni.', loginSoon: 'Kuingia kunakuja hivi karibuni.',
+      legal: 'Xaraash · Toleo 0.1 · 2026-10-20', sample: 'Matangazo hapa chini ni mifano, si ya kweli.',
+      links: ['Jisajili','Ongeza watazamaji wa tangazo','Leseni','Punguzo','Maswali ya mara kwa mara','Wasiliana nasi','Kamisheni ya tovuti','Masharti na vigezo','Kituo cha usalama','Akaunti na namba zilizositishwa','Sera ya faragha','Uanachama wa wauzaji','Huduma ya ununuzi unaoaminika','Ukadiriaji','Bidhaa zilizopigwa marufuku','Sera ya mali miliki']
+    }
+  };
+
+  T.am = {
+    login: 'ግባ', search: 'መኪና፣ ስልክ፣ ቤት ይፈልጉ…', add: 'ማስታወቂያ ለጥፍ', region: 'ክልል', allRegions: 'ሁሉም ከተሞች',
+    'new': 'አዲስ', cheap: 'ዝቅተኛ ዋጋ', more: 'ተጨማሪ አሳይ', count: '{n} ማስታወቂያዎች', none: 'ተዛማጅ ማስታወቂያ አልተገኘም። ሌላ ቃል ይሞክሩ።',
+    neg: 'ድርድር', now: 'አሁን', mAgo: '{n} ደቂቃ', hAgo: '{n} ሰዓት', you: 'እርስዎ',
+    cat: { all:'መነሻ', cars:'መኪናዎች', devices:'መሣሪያዎች', real:'ሪል እስቴት', furniture:'የቤት ዕቃ', services:'አገልግሎቶች', fashion:'ፋሽን', animals:'እንስሳት', jobs:'ሥራዎች', games:'ጨዋታዎች', coaching:'ሥልጠና', food:'ምግብ', gardens:'የአትክልት ስፍራ', tourism:'ቱሪዝም', trips:'ጉዞዎች', events:'ዝግጅቶች', arts:'ጥበብ', coding:'ኮድ', lost:'የጠፋና የተገኘ', projects:'ፕሮጀክቶች' },
+    gBrands: 'የመኪና ብራንዶች', gTypes: 'የተሽከርካሪ ዓይነቶች', gDev: 'የመሣሪያ ብራንዶች', gAnimals: 'የእንስሳት ዓይነቶች', gReal: 'የንብረት ዓይነቶች',
+    tg: { parts:'መለዋወጫ', trucks:'ጭነት መኪናዎችና ቫኖች', moto:'ሞተር ሳይክሎች', classic:'ክላሲክ', crashed:'የተጋጩ', lease:'ለኪራይ', sheep:'በጎች', goat:'ፍየሎች', camel:'ግመሎች', cow:'ከብቶች', horse:'ፈረሶች', cat:'ድመቶች', chicken:'ዶሮዎች', land:'መሬት ለሽያጭ', house:'ቤቶች ለሽያጭ', rent:'ለኪራይ', shop:'ሱቆች' },
+    dl1: 'አውርድ በ', dl2: 'ያግኙት በ', dl3: 'ያስሱ በ', applangs: 'Xaraash መተግበሪያ፡ Soomaali · English · Kiswahili · አማርኛ · Français',
+    tagline: 'Xaraash፣ የመላው ምስራቅ አፍሪካ ገበያ', stripA: 'ግዙ፣ ሽጡ፣ ተገናኙ።', stripB: 'በሶማሊያ፣ ኬንያ፣ ታንዛኒያ፣ ዩጋንዳ፣ ኢትዮጵያ፣ ጅቡቲና ሩዋንዳ የተከፈተ ገበያ።',
+    fTitle: 'የማስታወቂያ ርዕስ', fCat: 'ምድብ', fCity: 'ከተማ', fPrice: 'ዋጋ (አማራጭ)', cancel: 'ተወው', publish: 'ለጥፍ',
+    added: 'ማስታወቂያዎ በዚህ ገጽ ላይ ብቻ ተጨምሯል። አልተቀመጠም።', soon: 'ይህ ክፍል በቅርቡ ይመጣል።', loginSoon: 'መግቢያ በቅርቡ ይመጣል።',
+    legal: 'Xaraash · ስሪት 0.1 · 2026-10-20', sample: 'ከታች ያሉት ማስታወቂያዎች ምሳሌዎች ናቸው፣ እውነተኛ አይደሉም።',
+    links: ['ይመዝገቡ','የማስታወቂያ እይታ ይጨምሩ','ፈቃድ','ቅናሽ','ተደጋጋሚ ጥያቄዎች','ያግኙን','የድረገጽ ኮሚሽን','ውሎችና ሁኔታዎች','የደህንነት ማዕከል','የታገዱ መለያዎችና ቁጥሮች','የግላዊነት ፖሊሲ','የነጋዴዎችና ኤጀንሲዎች አባልነት','የታመነ ግዢ አገልግሎት','ደረጃ መስጠት','የተከለከሉ ዕቃዎች','የአእምሯዊ ንብረት ፖሊሲ']
+  };
+  T.fr = {
+    login: 'Connexion', search: 'Rechercher voitures, téléphones, maisons…', add: 'Publier une annonce', region: 'Région', allRegions: 'Toutes les villes',
+    'new': 'Récent', cheap: 'Prix bas', more: 'Voir plus', count: '{n} annonces', none: 'Aucune annonce correspondante. Essayez un autre mot.',
+    neg: 'À négocier', now: 'à l’instant', mAgo: '{n} min', hAgo: '{n} h', you: 'Vous',
+    cat: { all:'Accueil', cars:'Voitures', devices:'Appareils', real:'Immobilier', furniture:'Meubles', services:'Services', fashion:'Mode', animals:'Animaux', jobs:'Emplois', games:'Jeux', coaching:'Formation', food:'Alimentation', gardens:'Jardins', tourism:'Tourisme', trips:'Voyages', events:'Événements', arts:'Arts', coding:'Programmation', lost:'Objets perdus', projects:'Projets' },
+    gBrands: 'Marques de voitures', gTypes: 'Types de véhicules', gDev: 'Marques d’appareils', gAnimals: 'Types d’animaux', gReal: 'Types de biens',
+    tg: { parts:'Pièces', trucks:'Camions et fourgons', moto:'Motos', classic:'De collection', crashed:'Accidentées', lease:'En location', sheep:'Moutons', goat:'Chèvres', camel:'Chameaux', cow:'Bovins', horse:'Chevaux', cat:'Chats', chicken:'Poules', land:'Terrains à vendre', house:'Maisons à vendre', rent:'À louer', shop:'Boutiques' },
+    dl1: 'Télécharger sur', dl2: 'Disponible sur', dl3: 'Découvrir sur', applangs: 'Appli Xaraash : Soomaali · English · Kiswahili · አማርኛ · Français',
+    tagline: 'Xaraash, la place de marché de toute l’Afrique de l’Est', stripA: 'Achetez, vendez, connectez-vous.', stripB: 'Un marché ouvert en Somalie, au Kenya, en Tanzanie, en Ouganda, en Éthiopie, à Djibouti et au Rwanda.',
+    fTitle: 'Titre de l’annonce', fCat: 'Catégorie', fCity: 'Ville', fPrice: 'Prix (facultatif)', cancel: 'Annuler', publish: 'Publier',
+    added: 'Votre annonce a été ajoutée à cette page uniquement. Elle n’est pas enregistrée.', soon: 'Cette section arrive bientôt.', loginSoon: 'La connexion arrive bientôt.',
+    legal: 'Xaraash · Version 0.1 · 2026-10-20', sample: 'Les annonces ci-dessous sont des exemples, pas de vraies annonces.',
+    links: ['Inscription','Augmenter les vues','Licence','Remise','FAQ','Contact','Commission du site','Conditions générales','Centre de sécurité','Comptes et numéros suspendus','Politique de confidentialité','Adhésion des concessionnaires et agences','Service d’achat de confiance','Évaluation','Articles interdits','Politique de propriété intellectuelle']
+  };
+
+  var NEWI = {
+    so: { navHome: 'Hoyga', navSearch: 'Raadi', navChat: 'Caawiye', curAuto: 'Lacagta dalka', ratesLbl: 'Sarifka la isticmaalay', botTitle: 'Caawiyaha Xaraash', botHello: 'Salaan! Waxaan ku caawin karaa soo dirista xayeysiis, iibsiga ammaanka ah iyo sarifka lacagaha. Maxaad rabtaa inaad ogaato?', botPh: 'Qor su’aashaada…', botSend: 'Dir', botDown: 'Caawiyaha hadda ma diyaar aha. Fadlan akhri Xarunta Badbaadada ama isku day mar kale.', bq1: 'Sidee xayeysiis u soo dirtaa?', bq2: 'Sidee si ammaan ah u iibsadaa?', bq3: 'Sidee lacagta loo beddelaa?' },
+    en: { navHome: 'Home', navSearch: 'Search', navChat: 'Assistant', curAuto: 'Local currency', ratesLbl: 'Exchange rates used', botTitle: 'Xaraash Assistant', botHello: 'Hi! I can help with posting an ad, buying safely and currency conversion. What would you like to know?', botPh: 'Type your question…', botSend: 'Send', botDown: 'The assistant is not available right now. Please read the Safety Center or try again.', bq1: 'How do I post an ad?', bq2: 'How do I buy safely?', bq3: 'How are prices converted?' },
+    sw: { navHome: 'Nyumbani', navSearch: 'Tafuta', navChat: 'Msaidizi', curAuto: 'Sarafu ya nchi', ratesLbl: 'Viwango vya ubadilishaji', botTitle: 'Msaidizi wa Xaraash', botHello: 'Habari! Naweza kukusaidia kuweka tangazo, kununua kwa usalama na kubadilisha sarafu. Ungependa kujua nini?', botPh: 'Andika swali lako…', botSend: 'Tuma', botDown: 'Msaidizi hapatikani kwa sasa. Tafadhali soma Kituo cha Usalama au jaribu tena.', bq1: 'Ninawekaje tangazo?', bq2: 'Ninawezaje kununua kwa usalama?', bq3: 'Bei zinabadilishwaje?' },
+    am: { navHome: 'መነሻ', navSearch: 'ፈልግ', navChat: 'ረዳት', curAuto: 'የአገር ገንዘብ', ratesLbl: 'ጥቅም ላይ የዋለ የምንዛሪ ተመን', botTitle: 'የXaraash ረዳት', botHello: 'ሰላም! ማስታወቂያ ለመለጠፍ፣ በደህንነት ለመግዛትና ገንዘብ ለመቀየር እረዳለሁ። ምን ማወቅ ይፈልጋሉ?', botPh: 'ጥያቄዎን ይጻፉ…', botSend: 'ላክ', botDown: 'ረዳቱ አሁን አይገኝም። እባክዎ የደህንነት ማዕከልን ያንብቡ ወይም እንደገና ይሞክሩ።', bq1: 'ማስታወቂያ እንዴት እለጥፋለሁ?', bq2: 'በደህንነት እንዴት እገዛለሁ?', bq3: 'ዋጋዎች እንዴት ይቀየራሉ?' },
+    fr: { navHome: 'Accueil', navSearch: 'Chercher', navChat: 'Assistant', curAuto: 'Devise locale', ratesLbl: 'Taux de change utilisés', botTitle: 'Assistant Xaraash', botHello: 'Bonjour ! Je peux vous aider à publier une annonce, acheter en sécurité et convertir les devises. Que voulez-vous savoir ?', botPh: 'Écrivez votre question…', botSend: 'Envoyer', botDown: 'L’assistant n’est pas disponible pour le moment. Lisez le Centre de sécurité ou réessayez.', bq1: 'Comment publier une annonce ?', bq2: 'Comment acheter en sécurité ?', bq3: 'Comment les prix sont-ils convertis ?' }
+  };
+  Object.keys(NEWI).forEach(function (k) { Object.assign(T[k], NEWI[k]); });
+
+  var SIDE = [
+    { key: 'gBrands', cat: 'cars', tags: ['toyota','nissan','ford','lexus','chevrolet','mercedes','gmc','bmw','dodge'], brand: true },
+    { key: 'gTypes', cat: 'cars', tags: ['parts','trucks','moto','classic','crashed','lease'] },
+    { key: 'gDev', cat: 'devices', tags: ['apple','samsung','canon','sony','microsoft','nokia','lg'], brand: true },
+    { key: 'gAnimals', cat: 'animals', tags: ['sheep','goat','camel','cow','horse','cat','chicken'] },
+    { key: 'gReal', cat: 'real', tags: ['land','house','rent','shop'] }
+  ];
+  var BRANDNAME = { toyota:'Toyota', nissan:'Nissan', ford:'Ford', lexus:'Lexus', chevrolet:'Chevrolet', mercedes:'Mercedes', gmc:'GMC', bmw:'BMW', dodge:'Dodge', apple:'Apple', samsung:'Samsung', canon:'Canon', sony:'Sony', microsoft:'Microsoft', nokia:'Nokia', lg:'LG' };
+
+  // id, cat, tag, city, price(USD), seller, replies, minutes ago, titles [so, en, sw]
+  var DATA = [
+    [1,'cars','toyota','Muqdisho',14500,'cabdi_m',3,1,['Toyota RAV4 2019, xaalad wanaagsan','Toyota RAV4 2019, clean condition','Toyota RAV4 2019, hali nzuri','ቶዮታ RAV4 2019፣ በጥሩ ሁኔታ','Toyota RAV4 2019, en bon état']],
+    [2,'devices','apple','Hargeysa',620,'Hodan K.',2,3,['iPhone 13 128GB, gabi ahaanba dhammaystiran','iPhone 13 128GB, complete with box','iPhone 13 128GB, kamili na boksi','የአይፎን 13 128GB፣ ከሳጥኑ ጋር ሙሉ','iPhone 13 128 Go, complet avec boîte']],
+    [3,'cars','nissan','Kismaayo',3200,'faarax88',0,6,['Nissan Patrol 2008 oo la iibinayo','Nissan Patrol 2008 for sale','Nissan Patrol 2008 inauzwa','ኒሳን ፓትሮል 2008 ለሽያጭ','Nissan Patrol 2008 à vendre']],
+    [4,'real','house','Hargeysa',85000,'Guryo Hargeysa',5,9,['Guri 3 qol oo Jigjiga Yar ah','3-bedroom house in Jigjiga Yar','Nyumba ya vyumba 3 Jigjiga Yar','ባለ 3 መኝታ ቤት በጂግጂጋ ያር','Maison de 3 chambres à Jigjiga Yar']],
+    [5,'devices','samsung','Nairobi',310,'wanjiru_t',1,12,['Samsung Galaxy A54, wuu cusub yahay','Samsung Galaxy A54, like new','Samsung Galaxy A54, kama mpya','ሳምሰንግ ጋላክሲ A54፣ እንደ አዲስ','Samsung Galaxy A54, comme neuf']],
+    [6,'cars','parts','Garoowe',150,'Garoowe Parts',0,18,['Bamka biyaha ee Hilux','Water pump for Hilux','Pampu ya maji ya Hilux','የሂሉክስ የውሃ ፓምፕ','Pompe à eau pour Hilux']],
+    [7,'furniture','','Baydhabo',240,'Xalimo F.',2,25,['Fadhi 5 kursi ah oo maqaar ah','5-seat leather sofa set','Seti ya sofa ya ngozi viti 5','ባለ 5 መቀመጫ የቆዳ ሶፋ ስብስብ','Salon en cuir 5 places']],
+    [8,'services','',  'Muqdisho',null,'Nuur Electric',4,31,['Rakibaad korontada guryaha','House electrical wiring and repair','Huduma ya umeme wa nyumba','የቤት የኤሌክትሪክ ሽቦና ጥገና','Installation et réparation électrique à domicile']],
+    [9,'cars','chevrolet','Hargeysa',9800,'Axmed_1984',2,40,['Chevrolet Suburban 2017 diyaar ah','Chevrolet Suburban 2017 ready to sell','Chevrolet Suburban 2017 tayari kuuzwa','ቼቭሮሌት ሰበርባን 2017 ለሽያጭ ዝግጁ','Chevrolet Suburban 2017 prête à vendre']],
+    [10,'devices','canon','Mombasa',480,'Juma Cams',1,55,['Kamarada Canon 90D oo lens leh','Canon 90D camera with lens','Kamera ya Canon 90D na lenzi','ካኖን 90D ካሜራ ከሌንስ ጋር','Appareil photo Canon 90D avec objectif']],
+    [11,'fashion','','Boosaaso',45,'Sahra Style',0,70,['Macawis iyo shaash cusub','New macawis and headscarf set','Seti mpya ya macawis na kitambaa','አዲስ ማዋይስና ሻሽ ስብስብ','Ensemble neuf macawis et foulard']],
+    [12,'animals','goat','Burco',120,'Burco Xoolo',3,90,['Riyo 5 ah oo caano badan','5 dairy goats','Mbuzi 5 wa maziwa','5 ወተት የሚሰጡ ፍየሎች','5 chèvres laitières']],
+    [13,'jobs','','Dar es Salaam',null,'Mwanaisha',0,120,['Shaqo: darawal gaari yar','Job: driver for a small car','Ajira: dereva wa gari dogo','ሥራ፡ ለትንሽ መኪና ሹፌር','Emploi : chauffeur pour petite voiture']],
+    [14,'games','','Nairobi',380,'kevo_games',6,180,['PlayStation 5 oo laba gacan leh','PlayStation 5 with two controllers','PlayStation 5 na vidhibiti viwili','ፕሌይስቴሽን 5 ከሁለት ተቆጣጣሪዎች ጋር','PlayStation 5 avec deux manettes']],
+    [15,'coaching','','Hargeysa',25,'Ustaad Ismaaciil',1,240,['Casharo Ingiriisi ah bishiiba','Monthly English lessons','Masomo ya Kiingereza kila mwezi','ወርሃዊ የእንግሊዝኛ ትምህርቶች','Cours d’anglais mensuels']],
+    [16,'food','','Muqdisho',8,'Caano Geel',0,300,['Caano geel nadiif ah, 5 litir','Fresh camel milk, 5 litres','Maziwa ya ngamia safi, lita 5','ትኩስ የግመል ወተት፣ 5 ሊትር','Lait de chamelle frais, 5 litres']],
+    [17,'animals','camel','Garoowe',900,'Geel Nugaal',1,330,['Geel dheddig ah oo caano leh','Female camel in milk','Ngamia jike anayetoa maziwa','ወተት የምትሰጥ ሴት ግመል','Chamelle en lactation']],
+    [18,'real','land','Kismaayo',12000,'Dhul Kismaayo',2,360,['Dhul 20x30 oo dhow badda','20x30 plot close to the sea','Kiwanja 20x30 karibu na bahari','የ20x30 ቦታ ከባሕር አቅራቢያ','Terrain 20x30 près de la mer']],
+    [19,'gardens','','Baydhabo',60,'Beer Bay',0,400,['Geedo miro leh oo la beerto','Fruit tree seedlings','Miche ya miti ya matunda','የፍራፍሬ ዛፍ ችግኞች','Plants d’arbres fruitiers']],
+    [20,'tourism','','Mombasa',150,'Pwani Tours',1,420,['Safar badeed oo maalin ah','Day boat trip on the coast','Safari ya mashua ya siku moja pwani','የአንድ ቀን የጀልባ ጉዞ በባሕር ዳርቻ','Excursion d’une journée en bateau sur la côte']],
+    [21,'cars','toyota','Kampala',7200,'Kato Motors',2,450,['Toyota Premio 2012 oo la soo xambaaray','Toyota Premio 2012, recently imported','Toyota Premio 2012 iliyoagizwa karibuni','ቶዮታ ፕሪሚዮ 2012፣ አዲስ የገባ','Toyota Premio 2012, récemment importée']],
+    [22,'jobs','','Addis Ababa',null,'Selam H.',0,480,['Shaqo: iibiye dukaan','Job: shop assistant','Ajira: msaidizi wa duka','ሥራ፡ የሱቅ ረዳት','Emploi : vendeur en boutique']]
+  ];
+
+  var S = { lang: 'so', cur: 'auto', cat: 'all', tag: '', q: '', region: '', sort: 'new', shown: 8, mine: [] };
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  function svg(name) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[name] + '</svg>'; }
+  function t() { return T[S.lang]; }
+  function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
+
+  function ago(m) { var x = t(); if (m < 2) return x.now; if (m < 60) return x.mAgo.replace('{n}', m); return x.hAgo.replace('{n}', Math.round(m / 60)); }
+  // Rates per 1 USD, snapshot of 2026-10-20 (not live). Somalia is priced in US dollars only.
+  var RATES_DATE = '2026-10-20';
+  var CUR = { USD: { r: 1, s: '$' }, ETB: { r: 163.37, s: 'Br ' }, KES: { r: 129.47, s: 'KSh ' }, TZS: { r: 2645, s: 'TSh ' }, UGX: { r: 4136, s: 'USh ' }, RWF: { r: 1476, s: 'FRw ' }, DJF: { r: 177.72, s: 'Fdj ' } };
+  var CCUR = ['USD', 'KES', 'TZS', 'UGX', 'ETB', 'DJF', 'RWF'];
+  var CITYC = {};
+  COUNTRIES.forEach(function (k, i) { k.c.forEach(function (c) { CITYC[c] = i; }); });
+  function localCur(city) { var i = CITYC[city]; return i === undefined ? 'USD' : CCUR[i]; }
+  function subCur(city) { return localCur(city); }
+  function money(usd, code) {
+    var v = usd * CUR[code].r, n = (code === 'USD' && v < 100) ? Math.round(v * 100) / 100 : Math.round(v);
+    return CUR[code].s + n.toLocaleString('en-US');
+  }
+  function priceParts(p) {
+    var main = S.cur === 'auto' ? localCur(p.city) : S.cur;
+    var sec = main === 'USD' ? subCur(p.city) : 'USD';
+    if (sec === main) sec = null;
+    return { main: money(p.price, main), sec: sec ? money(p.price, sec) : '' };
+  }
+
+  function items() {
+    var all = S.mine.concat(DATA.map(function (d) {
+      return { id: d[0], cat: d[1], tag: d[2], city: d[3], price: d[4], user: d[5], re: d[6], age: d[7], title: d[8], mine: false };
+    }));
+    var q = S.q.trim().toLowerCase();
+    var out = all.filter(function (p) {
+      if (S.cat !== 'all' && p.cat !== S.cat) return false;
+      if (S.tag && p.tag !== S.tag) return false;
+      if (S.region && p.city !== S.region) return false;
+      if (q) { var hay = (p.title.join(' ') + ' ' + p.city + ' ' + p.user + ' ' + (BRANDNAME[p.tag] || '')).toLowerCase(); if (hay.indexOf(q) < 0) return false; }
+      return true;
+    });
+    out.sort(function (a, b) {
+      if (S.sort === 'cheap') { var pa = a.price == null ? 1e12 : a.price, pb = b.price == null ? 1e12 : b.price; return pa - pb; }
+      return a.age - b.age;
+    });
+    return out;
+  }
+
+  function renderRail() {
+    $('rail').innerHTML = CATS.map(function (c) {
+      return '<button class="cat" type="button" data-cat="' + c + '" aria-pressed="' + (S.cat === c) + '" style="--h:' + HUE[c] + '"><i class="ct">' + svg(c) + '</i><span>' + esc(t().cat[c]) + '</span></button>';
+    }).join('');
+  }
+  function renderSide() {
+    var x = t();
+    $('side').innerHTML = SIDE.filter(function (g) { return S.cat === 'all' || S.cat === g.cat; }).map(function (g) {
+      return '<div class="group"><h3>' + esc(x[g.key]) + '</h3><div class="tags">' + g.tags.map(function (tg) {
+        var lab = g.brand ? BRANDNAME[tg] : x.tg[tg];
+        return '<button class="tag" type="button" data-tag="' + tg + '" aria-pressed="' + (S.tag === tg) + '">' + esc(lab) + '</button>';
+      }).join('') + '</div></div>';
+    }).join('');
+  }
+  function renderList() {
+    var x = t(), res = items(), li = LI();
+    $('count').textContent = x.count.replace('{n}', res.length);
+    if (!res.length) { $('list').innerHTML = '<li class="empty">' + esc(x.none) + '</li>'; $('moreBtn').hidden = true; return; }
+    $('list').innerHTML = res.slice(0, S.shown).map(function (p) {
+      var pp = p.price == null ? null : priceParts(p);
+      var price = !pp ? '<span class="price neg">' + esc(x.neg) + '</span>' : '<span class="price">' + esc(pp.main) + (pp.sec ? '<small>≈ ' + esc(pp.sec) + '</small>' : '') + '</span>';
+      var who = p.mine ? x.you : p.user;
+      var rep = p.re ? '<span><svg viewBox="0 0 24 24"><path d="M4 5h12a1 1 0 011 1v7a1 1 0 01-1 1H9l-4 3v-3H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>' + p.re + '</span>' : '';
+      return '<li class="row' + (p.mine ? ' mine' : '') + '" data-ad="' + p.id + '"><div class="body"><h2><button class="tlink" type="button">' + esc(p.title[li] || p.title[0]) + '</button></h2><div class="meta">' +
+        '<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>' + esc(p.city) + '</span>' +
+        '<span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>' + esc(ago(p.age)) + '</span>' +
+        '<span><i class="av">' + esc(who.charAt(0).toUpperCase()) + '</i>' + esc(who) + '</span>' + rep + price +
+        '</div></div><div class="thumb" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div></li>';
+    }).join('');
+    $('moreBtn').hidden = res.length <= S.shown;
+  }
+  function renderRegion() {
+    var x = t();
+    $('region').innerHTML = '<option value="">' + esc(x.allRegions) + '</option>' + cityOpts(S.region);
+    $('region').setAttribute('aria-label', x.region);
+    var pc = $('pf-city').value;
+    $('pf-city').innerHTML = cityOpts(pc || 'Muqdisho');
+    $('cur').innerHTML = '<option value="auto">' + esc(x.curAuto) + '</option>' + Object.keys(CUR).map(function (c) { return '<option>' + c + '</option>'; }).join('');
+    $('cur').value = S.cur;
+    var pcu = $('pf-cur').value;
+    $('pf-cur').innerHTML = Object.keys(CUR).map(function (c) { return '<option>' + c + '</option>'; }).join('');
+    $('pf-cur').value = pcu || localCur($('pf-city').value);
+    updateConv();
+    var cur = $('pf-cat').value;
+    $('pf-cat').innerHTML = CATS.slice(1).map(function (c) { return '<option value="' + c + '">' + esc(x.cat[c]) + '</option>'; }).join('');
+    if (cur) $('pf-cat').value = cur;
+  }
+  function renderText() {
+    var x = t();
+    document.documentElement.lang = S.lang === 'sw' ? 'sw' : S.lang;
+    document.querySelectorAll('[data-i]').forEach(function (el) { el.textContent = x[el.getAttribute('data-i')]; });
+    document.querySelectorAll('[data-ip]').forEach(function (el) { el.placeholder = x[el.getAttribute('data-ip')]; });
+    var PAGEMAP = { 3: 'discount', 8: 'safety', 12: 'escrow', 15: 'ip' };
+    $('links').innerHTML = x.links.map(function (l, i) { return '<button class="linkbtn" type="button" ' + (PAGEMAP[i] ? 'data-page="' + PAGEMAP[i] + '"' : 'data-soon') + '>' + svg('l' + i) + '<span>' + esc(l) + '</span></button>'; }).join('');
+    document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang); });
+    renderRail(); renderSide(); renderRegion(); renderList(); renderView();
+    $('langSel').value = S.lang;
+    $('ratesLine').textContent = x.ratesLbl + ' (' + RATES_DATE + '): 1 USD = ' + ['ETB','KES','TZS','UGX','RWF','DJF'].map(function (c) { return CUR[c].r.toLocaleString('en-US') + ' ' + c; }).join(' · ');
+    renderQuick(); refreshHello();
+  }
+
+  var tt;
+  function toast(msg) { var el = $('toast'); el.textContent = msg; el.hidden = false; clearTimeout(tt); tt = setTimeout(function () { el.hidden = true; }, 3200); }
+
+  document.addEventListener('click', function (e) {
+    var rw = e.target.closest('.row');
+    if (rw && rw.dataset.ad) { nav('ad-' + rw.dataset.ad); return; }
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-back')) { nav(''); return; }
+    if (b.dataset.page) { nav(b.dataset.page); return; }
+    if (b.dataset.lang) { S.lang = b.dataset.lang; ls('xaraash-lang', S.lang); renderText(); return; }
+    if (b.dataset.cat) { S.cat = b.dataset.cat; S.tag = ''; S.shown = 8; renderRail(); renderSide(); renderList(); return; }
+    if (b.dataset.tag) { S.tag = S.tag === b.dataset.tag ? '' : b.dataset.tag; S.shown = 8; renderSide(); renderList(); return; }
+    if (b.hasAttribute('data-soon')) { toast(t().soon); return; }
+  });
+  $('loginBtn').onclick = function () { toast(t().loginSoon); };
+  $('q').oninput = function (e) { S.q = e.target.value; S.shown = 8; renderList(); };
+  $('region').onchange = function (e) { S.region = e.target.value; S.shown = 8; renderList(); };
+  $('sortNew').onclick = function () { S.sort = 'new'; $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false'); renderList(); };
+  $('sortCheap').onclick = function () { S.sort = 'cheap'; $('sortNew').setAttribute('aria-pressed', 'false'); $('sortCheap').setAttribute('aria-pressed', 'true'); renderList(); };
+  $('moreBtn').onclick = function () { S.shown += 8; renderList(); };
+
+  $('addBtn').onclick = function () { $('veil').hidden = false; $('pf-title').focus(); };
+  $('pf-cancel').onclick = function () { $('veil').hidden = true; };
+  $('veil').addEventListener('click', function (e) { if (e.target === $('veil')) $('veil').hidden = true; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $('veil').hidden = true; });
+  $('postForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = $('pf-title').value.trim(); if (!title) return;
+    var pr = $('pf-price').value, pcode = $('pf-cur').value, usd = pr === '' ? null : Math.round(Number(pr) / CUR[pcode].r * 100) / 100;
+    S.mine.unshift({ id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true });
+    $('postForm').reset(); $('veil').hidden = true; S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
+    $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false');
+    renderRail(); renderSide(); renderRegion(); renderList(); toast(t().added);
+  });
+
+  var themes = [null, 'dark', 'light'];
+  function setTheme(v) { var r = document.documentElement; if (v) r.setAttribute('data-theme', v); else r.removeAttribute('data-theme'); }
+  var th = ls('xaraash-theme'); if (th === 'dark' || th === 'light') setTheme(th);
+  $('themeBtn').onclick = function () {
+    var cur = document.documentElement.getAttribute('data-theme');
+    var dark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = dark ? 'light' : 'dark'; setTheme(next); ls('xaraash-theme', next);
+  };
+  var sc = 1;
+  function setScale(v) { sc = Math.max(.85, Math.min(1.3, v)); document.documentElement.style.setProperty('--scale', sc); }
+  $('fsUp').onclick = function () { setScale(sc + .1); };
+  $('fsDown').onclick = function () { setScale(sc - .1); };
+
+  /* ---------- Detail view + info pages ---------- */
+  var X = {
+    so: { back: 'Dib u noqo', home: 'Hoyga', city: 'Magaalada', cat: 'Qaybta', posted: 'La soo dhigay', price: 'Qiimaha', seller: 'Iibiyaha', contact: 'La xiriir iibiyaha', report: 'Soo sheeg', similar: 'Xayeysiisyo la mid ah',
+      desc: 'Xayeysiiskan waxaa soo dhigay {u}. Wax weydii iibiyaha, hubi alaabta adigoo isaga la kulmaya, oo ha bixin lacag ka hor intaadan arkin.', descTag: 'Sharaxaad tusaale ah',
+      tip: 'Talo badbaado: ku kulan goob dadweyne.', tipLink: 'Akhri Xarunta Badbaadada', loginAsk: 'Fadhlan gal si aad u aragto xaaladdaada.', eg: 'Qoraalka boggan waa qabyo tusaale ah, ma aha shuruud rasmi ah.' },
+    en: { back: 'Go back', home: 'Home', city: 'City', cat: 'Category', posted: 'Posted', price: 'Price', seller: 'Seller', contact: 'Contact seller', report: 'Report', similar: 'Similar posts',
+      desc: 'This post was added by {u}. Ask the seller questions, check the item in person, and do not pay before you have seen it.', descTag: 'Example description',
+      tip: 'Safety tip: meet in a busy public place.', tipLink: 'Read the Safety Center', loginAsk: 'Please log in to check your status.', eg: 'The text on this page is a draft example, not an official policy.' },
+    sw: { back: 'Rudi nyuma', home: 'Nyumbani', city: 'Mji', cat: 'Kategoria', posted: 'Limewekwa', price: 'Bei', seller: 'Muuzaji', contact: 'Wasiliana na muuzaji', report: 'Ripoti', similar: 'Matangazo yanayofanana',
+      desc: 'Tangazo hili limewekwa na {u}. Muulize muuzaji maswali, kagua bidhaa ana kwa ana, na usilipe kabla ya kuiona.', descTag: 'Maelezo ya mfano',
+      tip: 'Kidokezo cha usalama: kutana mahali pa watu wengi.', tipLink: 'Soma Kituo cha Usalama', loginAsk: 'Tafadhali ingia ili uone hali yako.', eg: 'Maandishi ya ukurasa huu ni rasimu ya mfano, si sera rasmi.' }
+  };
+  X.am = { back: 'ተመለስ', home: 'መነሻ', city: 'ከተማ', cat: 'ምድብ', posted: 'የተለጠፈው', price: 'ዋጋ', seller: 'ሻጭ', contact: 'ሻጩን ያነጋግሩ', report: 'ሪፖርት', similar: 'ተመሳሳይ ማስታወቂያዎች',
+    desc: 'ይህ ማስታወቂያ በ{u} ተለጥፏል። ሻጩን ይጠይቁ፣ እቃውን በአካል ይፈትሹ፣ ሳያዩ አይክፈሉ።', descTag: 'የምሳሌ መግለጫ',
+    tip: 'የደህንነት ምክር፡ ሰዎች በሚበዙበት የሕዝብ ቦታ ይገናኙ።', tipLink: 'የደህንነት ማዕከልን ያንብቡ', loginAsk: 'ሁኔታዎን ለማየት እባክዎ ይግቡ።', eg: 'በዚህ ገጽ ያለው ጽሑፍ የረቂቅ ምሳሌ ነው፣ ኦፊሴላዊ ፖሊሲ አይደለም።' };
+  X.fr = { back: 'Retour', home: 'Accueil', city: 'Ville', cat: 'Catégorie', posted: 'Publié', price: 'Prix', seller: 'Vendeur', contact: 'Contacter le vendeur', report: 'Signaler', similar: 'Annonces similaires',
+    desc: 'Cette annonce a été publiée par {u}. Posez vos questions au vendeur, vérifiez l’article en personne et ne payez pas avant de l’avoir vu.', descTag: 'Description d’exemple',
+    tip: 'Conseil de sécurité : rencontrez-vous dans un lieu public fréquenté.', tipLink: 'Lire le Centre de sécurité', loginAsk: 'Veuillez vous connecter pour voir votre statut.', eg: 'Le texte de cette page est un brouillon d’exemple, pas une politique officielle.' };
+  function LI() { return { so: 0, en: 1, sw: 2, am: 3, fr: 4 }[S.lang]; }
+  var ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+  function allPosts() {
+    return S.mine.concat(DATA.map(function (d) { return { id: d[0], cat: d[1], tag: d[2], city: d[3], price: d[4], user: d[5], re: d[6], age: d[7], title: d[8], mine: false }; }));
+  }
+  // Pages: title [so,en,sw], lead, blocks {h, p[], ul[], ol[], chips[], login}
+  var PG = {
+    safety: {
+      title: ['Xarunta Badbaadada', 'Safety Center', 'Kituo cha Usalama', 'የደህንነት ማዕከል', 'Centre de sécurité'],
+      lead: ['Xaraash waxay rabtaa in dadku si ammaan ah u iibsadaan oo u iibiyaan. Halkan ka baro sida aad u ilaalin lahayd naftaada iyo lacagtaada.', 'Xaraash is built for people who want to buy and sell safely. Here is how to protect yourself and your money.', 'Xaraash imejengwa kwa watu wanaotaka kununua na kuuza kwa usalama. Hivi ndivyo unavyoweza kujilinda wewe na pesa zako.', 'Xaraash ሰዎች በደህንነት እንዲገዙና እንዲሸጡ የተሰራ ነው። እራስዎን እና ገንዘብዎን እንዴት እንደሚጠብቁ እነሆ።', 'Xaraash est conçu pour acheter et vendre en toute sécurité. Voici comment vous protéger, vous et votre argent.'],
+      blocks: [
+        { h: ['Ka ilaali khayaano', 'Protection from fraud', 'Jilinde dhidi ya ulaghai', 'ከማጭበርበር መከላከል', 'Protection contre la fraude'], ul: [
+          ['Ha bixin lacag ka hor intaadan alaabta arkin oo hubin.', 'Do not pay before you have seen and checked the item.', 'Usilipe kabla ya kuona na kukagua bidhaa.', 'እቃውን ሳያዩና ሳይፈትሹ አይክፈሉ።', 'Ne payez pas avant d’avoir vu et vérifié l’article.'],
+          ['Ku kulan goob dadweyne oo nabdoon, maalinta.', 'Meet in a safe public place, in daylight.', 'Kutana mahali salama pa watu wengi, mchana.', 'በቀን ብርሃን ደህንነቱ በተጠበቀ የሕዝብ ቦታ ይገናኙ።', 'Rencontrez-vous dans un lieu public sûr, en plein jour.'],
+          ['Ha la wadaagin cidna koodhka xaqiijinta ama erayga sirta ah.', 'Never share a verification code or password with anyone.', 'Usimpe mtu yeyote msimbo wa uthibitisho au nenosiri.', 'የማረጋገጫ ኮድ ወይም የይለፍ ቃል ለማንም አያጋሩ።', 'Ne partagez jamais un code de vérification ou un mot de passe.'],
+          ['Marka aydan kulmi karin, isticmaal Adeegga Iibsiga Aaminka ah.', 'When you cannot meet, use the Trusted Purchase Service.', 'Usipoweza kukutana, tumia Huduma ya Ununuzi Unaoaminika.', 'መገናኘት ካልቻሉ የታመነ ግዢ አገልግሎትን ይጠቀሙ።', 'Si vous ne pouvez pas vous rencontrer, utilisez le Service d’achat de confiance.'],
+          ['Ha furin xiriiriyeyaal ka baxsan Xaraash oo aad shaki ka qabto.', 'Do not open links from outside Xaraash that look suspicious.', 'Usifungue viungo vya nje ya Xaraash vinavyotia shaka.', 'ከXaraash ውጭ የሚመጡ አጠራጣሪ ሊንኮችን አይክፈቱ።', 'N’ouvrez pas les liens suspects venant de l’extérieur de Xaraash.']
+        ] },
+        { h: ['Ceyrin iyo hanjabaad', 'Harassment and threats', 'Unyanyasaji na vitisho', 'ትንኮሳና ዛቻ', 'Harcèlement et menaces'], p: [['Ceyrin, hanjabaad iyo takoor ma aqbalno. Haddii lagu dhibo, xannib isticmaalaha, soo sheeg xayeysiiska, ama nala soo xiriir.', 'We do not accept harassment, threats or discrimination. If you are targeted, block the user, report the post, or contact us.', 'Hatukubali unyanyasaji, vitisho wala ubaguzi. Ukilengwa, mzuie mtumiaji, ripoti tangazo, au wasiliana nasi.', 'ትንኮሳን፣ ዛቻን ወይም መድልዎን አንቀበልም። ዒላማ ከሆኑ ተጠቃሚውን ያግዱ፣ ማስታወቂያውን ሪፖርት ያድርጉ ወይም ያግኙን።', 'Nous n’acceptons ni harcèlement, ni menaces, ni discrimination. Si vous êtes visé, bloquez l’utilisateur, signalez l’annonce ou contactez-nous.']] },
+        { h: ['Ilaalinta caruurta', 'Child protection', 'Ulinzi wa watoto', 'የሕፃናት ጥበቃ', 'Protection de l’enfance'], p: [['Xayeysiis kasta oo waxyeello u geysta caruurta waa laga saaraa. Haddii aad aragto mid, soo sheeg isla markiiba.', 'Any post that harms children is removed. If you see one, report it right away.', 'Tangazo lolote linalowadhuru watoto huondolewa. Ukiliona, liripoti mara moja.', 'ሕፃናትን የሚጎዳ ማንኛውም ማስታወቂያ ይወገዳል። ካዩ ወዲያውኑ ሪፖርት ያድርጉ።', 'Toute annonce qui nuit aux enfants est supprimée. Si vous en voyez une, signalez-la immédiatement.']] },
+        { h: ['Dumarka iyo gabdhaha', 'Women and girls', 'Wanawake na wasichana', 'ሴቶችና ልጃገረዶች', 'Femmes et filles'], p: [['Ha u dirin lambarkaaga qof aadan aqoon. Isticmaal farriimaha Xaraash, oo isticmaalaha xannib haddii aad dareento khatar.', 'Do not give your number to someone you do not know. Use Xaraash messages, and block anyone who makes you feel unsafe.', 'Usimpe namba yako mtu usiyemjua. Tumia ujumbe wa Xaraash, na mzuie yeyote anayekufanya ujisikie huna usalama.', 'የማያውቁትን ሰው ስልክ ቁጥርዎን አይስጡ። የXaraash መልዕክቶችን ይጠቀሙ፣ ደህንነት የማይሰማዎት ሰው ካለ ያግዱት።', 'Ne donnez pas votre numéro à quelqu’un que vous ne connaissez pas. Utilisez la messagerie Xaraash et bloquez toute personne qui vous met mal à l’aise.']] },
+        { h: ['Ka ganacsiga dadka', 'Human trafficking', 'Biashara ya binadamu', 'የሰዎች ዝውውር', 'Traite des êtres humains'], p: [['Xayeysiis ku saabsan dhoofinta dadka, shaqo been ah ama iibinta xubno jirka ah waa mamnuuc. Haddii aad khatar ku jirto, la xiriir booliiska ama hay’adda gargaarka ee deegaankaaga.', 'Posts about people trafficking, fake job offers or selling body organs are banned. If you are in danger, contact your local police or aid organisation.', 'Matangazo ya biashara ya binadamu, ajira za uongo au kuuza viungo vya mwili ni marufuku. Ukiwa hatarini, wasiliana na polisi au shirika la msaada la eneo lako.', 'ስለ ሰዎች ዝውውር፣ የሐሰት የሥራ ማስታወቂያ ወይም የአካል ክፍሎች ሽያጭ የሚያወሩ ማስታወቂያዎች የተከለከሉ ናቸው። አደጋ ላይ ከሆኑ የአካባቢዎን ፖሊስ ወይም የእርዳታ ድርጅት ያግኙ።', 'Les annonces de traite d’êtres humains, de fausses offres d’emploi ou de vente d’organes sont interdites. Si vous êtes en danger, contactez la police ou une organisation d’aide locale.']] },
+        { h: ['Sida loo soo sheego', 'How to report', 'Jinsi ya kuripoti', 'እንዴት ሪፖርት ማድረግ እንደሚቻል', 'Comment signaler'], p: [['Dhagsii “Soo sheeg” boggan xayeysiiska, ama nala soo xiriir. Khatar degdeg ah haddii ay jirto, marka hore la xiriir amniga deegaankaaga.', 'Use “Report” on the post page, or contact us. For immediate danger, contact local emergency services first.', 'Tumia “Ripoti” kwenye ukurasa wa tangazo, au wasiliana nasi. Kwa hatari ya haraka, wasiliana kwanza na huduma za dharura za eneo lako.', 'በማስታወቂያው ገጽ ላይ “ሪፖርት” ይጠቀሙ ወይም ያግኙን። ለአስቸኳይ አደጋ መጀመሪያ የአካባቢዎን የአደጋ ጊዜ አገልግሎት ያግኙ።', 'Utilisez « Signaler » sur la page de l’annonce, ou contactez-nous. En cas de danger immédiat, appelez d’abord les services d’urgence locaux.']] }
+      ]
+    },
+    escrow: {
+      title: ['Adeegga Iibsiga Aaminka ah', 'Trusted Purchase Service', 'Huduma ya Ununuzi Unaoaminika', 'የታመነ ግዢ አገልግሎት', 'Service d’achat de confiance'],
+      lead: ['Lacagta waxaa haysa dhinac saddexaad oo aaminka ah ilaa iibsadaha xaqiijiyo inuu alaabta helay.', 'A third party holds the payment until the buyer confirms the item has arrived.', 'Mhusika wa tatu anashikilia malipo hadi mnunuzi athibitishe kupokea bidhaa.', 'ገዢው እቃው መድረሱን እስኪያረጋግጥ ድረስ ሦስተኛ ወገን ክፍያውን ይይዛል።', 'Un tiers conserve le paiement jusqu’à ce que l’acheteur confirme la réception de l’article.'],
+      blocks: [
+        { h: ['Saddexda dhinac', 'The three parties', 'Pande tatu', 'ሦስቱ ወገኖች', 'Les trois parties'], chips: [[['Iibsade', 'Buyer', 'Mnunuzi', 'ገዢ', 'Acheteur'], '#2a6bc2'], [['Xaraash Aaman', 'Xaraash Escrow', 'Xaraash Escrow', 'Xaraash Escrow', 'Xaraash Séquestre'], '#2fa88a'], [['Iibiye', 'Seller', 'Muuzaji', 'ሻጭ', 'Vendeur'], '#e0992f']] },
+        { h: ['Sida ay u shaqeyso', 'How it works', 'Jinsi inavyofanya kazi', 'እንዴት ይሰራል', 'Comment ça marche'], ol: [
+          ['Iibsadaha iyo iibiyaha way ku heshiiyaan qiimaha iyo habka gaarsiinta.', 'Buyer and seller agree on the price and how the item is delivered.', 'Mnunuzi na muuzaji wanakubaliana bei na njia ya kufikisha bidhaa.', 'ገዢና ሻጭ በዋጋውና በእቃው አቅርቦት ዘዴ ይስማማሉ።', 'L’acheteur et le vendeur conviennent du prix et du mode de livraison.'],
+          ['Iibsadaha ayaa lacagta geliya Xaraash Aaman.', 'The buyer pays the money into Xaraash Escrow.', 'Mnunuzi analipa pesa kwa Xaraash Escrow.', 'ገዢው ገንዘቡን ወደ Xaraash Escrow ይከፍላል።', 'L’acheteur verse l’argent sur Xaraash Séquestre.'],
+          ['Iibiyaha ayaa dira ama gacanta ku dhiibaya alaabta.', 'The seller ships or hands over the item.', 'Muuzaji anatuma au anakabidhi bidhaa.', 'ሻጩ እቃውን ይልካል ወይም ያስረክባል።', 'Le vendeur expédie ou remet l’article.'],
+          ['Iibsadaha ayaa xaqiijiya inuu helay alaabta oo sax ah.', 'The buyer confirms the item arrived as described.', 'Mnunuzi anathibitisha kuwa bidhaa imefika kama ilivyoelezwa.', 'ገዢው እቃው እንደተገለጸው መድረሱን ያረጋግጣል።', 'L’acheteur confirme que l’article est conforme à la description.'],
+          ['Lacagta waxaa la siidaayaa iibiyaha.', 'The money is released to the seller.', 'Pesa inaachiliwa kwa muuzaji.', 'ገንዘቡ ለሻጩ ይለቀቃል።', 'L’argent est libéré au vendeur.']
+        ] },
+        { h: ['Shuruudaha', 'Terms', 'Masharti', 'ውሎች', 'Conditions'], ul: [
+          ['Adeeggan weli waa la dhisayaa. Khidmadaha iyo habka lacag bixinta (tusaale, lacagta mobaylka) waa la ogeysiin doonaa.', 'This service is still being built. Fees and payment methods (for example mobile money) will be announced.', 'Huduma hii bado inajengwa. Ada na njia za malipo (kwa mfano pesa za simu) zitatangazwa.', 'ይህ አገልግሎት ገና በመገንባት ላይ ነው። ክፍያዎችና የመክፈያ ዘዴዎች (ለምሳሌ የሞባይል ገንዘብ) ይገለጻሉ።', 'Ce service est en cours de construction. Les frais et moyens de paiement (par exemple le mobile money) seront annoncés.'],
+          ['Haddii iibsadaha uusan xaqiijin, kiiska waxaa eegaya kooxda Xaraash.', 'If the buyer does not confirm, the Xaraash team reviews the case.', 'Mnunuzi asipothibitisha, timu ya Xaraash itapitia kesi.', 'ገዢው ካላረጋገጠ የXaraash ቡድን ጉዳዩን ይመረምራል።', 'Si l’acheteur ne confirme pas, l’équipe Xaraash examine le dossier.']
+        ] }
+      ]
+    },
+    discount: {
+      title: ['Nidaamka Dhimista', 'Discount System', 'Mfumo wa Punguzo', 'የቅናሽ ስርዓት', 'Système de remises'],
+      lead: ['Dhimistu waxay hoos u dhigtaa komishanka iibka iyadoo lagu salaynayo sida aad ula shaqeyso Xaraash.', 'The discount lowers your sales commission based on how you work with Xaraash.', 'Punguzo hupunguza kamisheni ya mauzo kulingana na jinsi unavyofanya kazi na Xaraash.', 'ቅናሹ ከXaraash ጋር በሚሰሩበት መንገድ መሰረት የሽያጭ ኮሚሽንዎን ይቀንሳል።', 'La remise réduit votre commission de vente selon votre façon de travailler avec Xaraash.'],
+      blocks: [
+        { h: ['Waa maxay?', 'What is it?', 'Ni nini?', 'ምንድን ነው?', 'De quoi s’agit-il ?'], p: [['Tusaale: komishanka aasaasiga ah waa 1% iibka. Nidaamku wuxuu u dhimi karaa boqolleyda hoose. Waxay khusaysaa qaybta gawaarida iyo rootooyinka.', 'Example: the base commission is 1% of the sale. The system can lower it to a smaller percentage. It applies to the cars and trucks sector.', 'Mfano: kamisheni ya msingi ni 1% ya mauzo. Mfumo unaweza kuipunguza hadi asilimia ndogo. Inahusu sekta ya magari na malori.', 'ምሳሌ፡ መነሻ ኮሚሽኑ የሽያጩ 1% ነው። ስርዓቱ ወደ ዝቅተኛ መቶኛ ሊቀንሰው ይችላል። ለመኪናና ለጭነት መኪና ዘርፍ ይሰራል።', 'Exemple : la commission de base est de 1 % de la vente. Le système peut la réduire à un pourcentage plus faible. Elle s’applique au secteur des voitures et camions.']] },
+        { h: ['Yaa u qalma?', 'Who is it for?', 'Ni kwa nani?', 'ለማን ነው?', 'Pour qui ?'], p: [['Dhammaan dadka xayeysiiya gawaarida: shakhsiyaad, dilaaliin, iyo bandhigyada gawaarida.', 'Everyone who advertises vehicles: individuals, dealers, marketers and car showrooms.', 'Wote wanaotangaza magari: watu binafsi, madalali na vyumba vya maonyesho.', 'ተሽከርካሪዎችን ለሚያስተዋውቁ ሁሉ፡ ግለሰቦች፣ ነጋዴዎች፣ ደላሎችና የመኪና ማሳያ ክፍሎች።', 'Tous ceux qui annoncent des véhicules : particuliers, concessionnaires, intermédiaires et salons automobiles.']] },
+        { h: ['Maxaa dhimista go’aamiya?', 'What sets the discount?', 'Ni nini huamua punguzo?', 'ቅናሹን የሚወስነው ምንድን ነው?', 'Qu’est-ce qui détermine la remise ?'], ul: [
+          ['Tirada iyo qiimaha iibka.', 'The number and value of sales.', 'Idadi na thamani ya mauzo.', 'የሽያጭ ብዛትና ዋጋ።', 'Le nombre et la valeur des ventes.'],
+          ['Bixinta khidmadaha waqtigeeda.', 'Paying fees on time.', 'Kulipa ada kwa wakati.', 'ክፍያዎችን በጊዜ መክፈል።', 'Payer les frais à temps.'],
+          ['Cabashooyin la’aan oo iibsadayaal ka yimaada.', 'No complaints from buyers.', 'Kutokuwa na malalamiko kutoka kwa wanunuzi.', 'ከገዢዎች ቅሬታ አለመኖር።', 'Aucune plainte d’acheteurs.'],
+          ['Ixtiraamka xayeysiisyada kale.', 'Respecting other people’s posts.', 'Kuheshimu matangazo ya wengine.', 'የሌሎችን ማስታወቂያ ማክበር።', 'Respecter les annonces des autres.'],
+          ['In aan iibsadaha laga qaadin khidmad dheeraad ah.', 'Not charging the buyer extra fees.', 'Kutomtoza mnunuzi ada za ziada.', 'ከገዢው ተጨማሪ ክፍያ አለመጠየቅ።', 'Ne pas facturer de frais supplémentaires à l’acheteur.'],
+          ['Isu dheelitirka xayeysiisyada iyo iibka: xayeysiis yar oo iib badan waxay kordhisaa dhimista.', 'A good ratio of posts to sales: fewer posts with more sales raises the discount.', 'Uwiano mzuri wa matangazo na mauzo: matangazo machache na mauzo mengi huongeza punguzo.', 'ጥሩ የማስታወቂያና የሽያጭ ጥምርታ፡ ጥቂት ማስታወቂያዎች ከብዙ ሽያጭ ጋር ቅናሹን ይጨምራል።', 'Un bon rapport annonces/ventes : moins d’annonces et plus de ventes augmentent la remise.']
+        ] },
+        { h: ['Goorma ayaan helaa?', 'When do I get it?', 'Nitaipata lini?', 'መቼ አገኘዋለሁ?', 'Quand l’obtiens-je ?'], p: [['Dhimista waxay bilaabataa kadib khidmadkii ugu horreeyay. Usbuuc kasta si toos ah ayaa loo xisaabiyaa, oo waxaad heleysaa ogeysiis.', 'The discount starts after your first sales fee is paid. It is calculated automatically each week and you get a notification.', 'Punguzo huanza baada ya ada ya kwanza ya mauzo kulipwa. Huhesabiwa kila wiki kiotomatiki na utapata arifa.', 'ቅናሹ የመጀመሪያው የሽያጭ ክፍያ ከተከፈለ በኋላ ይጀምራል። በየሳምንቱ በራስ-ሰር ይሰላል፣ ማሳወቂያም ይደርስዎታል።', 'La remise démarre après le paiement de vos premiers frais de vente. Elle est calculée automatiquement chaque semaine et vous recevez une notification.']] },
+        { h: ['Ma haysaa dhimis hadda?', 'Do I have a discount now?', 'Je, nina punguzo sasa?', 'አሁን ቅናሽ አለኝ?', 'Ai-je une remise en ce moment ?'], login: true },
+        { h: ['Xusuusin', 'Notes', 'Maelezo', 'ማስታወሻ', 'Remarques'], ul: [
+          ['Dhimistu waxay khusaysaa hal xubin iyo hal xayeysiis.', 'The discount applies to one membership and one post.', 'Punguzo linahusu uanachama mmoja na tangazo moja.', 'ቅናሹ ለአንድ አባልነትና ለአንድ ማስታወቂያ ብቻ ይሰራል።', 'La remise s’applique à un seul compte et à une seule annonce.'],
+          ['Way kordhi kartaa ama yaraan kartaa wakhti ka dib.', 'It can go up or down over time.', 'Linaweza kupanda au kushuka baada ya muda.', 'በጊዜ ሂደት ሊጨምር ወይም ሊቀንስ ይችላል።', 'Elle peut augmenter ou diminuer avec le temps.']
+        ] }
+      ]
+    },
+    ip: {
+      title: ['Siyaasadda Hantida Maskaxda iyo Summadda', 'Intellectual Property and Brand Policy', 'Sera ya Mali Miliki na Chapa', 'የአእምሯዊ ንብረትና የምርት ስም ፖሊሲ', 'Politique de propriété intellectuelle et de marque'],
+      lead: ['Sida loo isticmaalo magaca, astaanta iyo nuxurka Xaraash, iyo sida loo ilaaliyo xuquuqda dadka kale.', 'How the Xaraash name, logo and content may be used, and how other people’s rights are protected.', 'Jinsi jina, nembo na maudhui ya Xaraash yanavyoweza kutumika, na jinsi haki za wengine zinavyolindwa.', 'የXaraash ስም፣ አርማና ይዘት እንዴት ጥቅም ላይ ሊውሉ እንደሚችሉና የሌሎች መብቶች እንዴት እንደሚጠበቁ።', 'Comment le nom, le logo et le contenu de Xaraash peuvent être utilisés, et comment les droits des autres sont protégés.'],
+      blocks: [
+        { h: ['Hantida Xaraash', 'What Xaraash owns', 'Anachomiliki Xaraash', 'Xaraash ባለቤት የሆነበት', 'Ce que possède Xaraash'], p: [['Magaca Xaraash, astaanta xiddigga iyo naqshadaha bogga waa hanti Xaraash.', 'The Xaraash name, star mark and page designs belong to Xaraash.', 'Jina la Xaraash, alama ya nyota na miundo ya kurasa ni mali ya Xaraash.', 'የXaraash ስም፣ የኮከብ ምልክትና የገጽ ዲዛይኖች የXaraash ንብረት ናቸው።', 'Le nom Xaraash, l’étoile et les designs des pages appartiennent à Xaraash.']] },
+        { h: ['Isticmaalka la ogol yahay', 'Allowed use', 'Matumizi yanayoruhusiwa', 'የተፈቀደ አጠቃቀም', 'Usage autorisé'], ul: [['Ku xusidda magaca bogga qoraal caadi ah, adigoo aan soo jeedin wada shaqeyn rasmi ah.', 'Mentioning the site by name in plain text, without suggesting an official partnership.', 'Kutaja jina la tovuti kwa maandishi ya kawaida, bila kudokeza ushirikiano rasmi.', 'ድረገጹን በስሙ በተራ ጽሑፍ መጥቀስ፣ ኦፊሴላዊ አጋርነት ሳይጠቁሙ።', 'Citer le site par son nom en texte simple, sans suggérer de partenariat officiel.']] },
+        { h: ['Isticmaalka la mamnuucay', 'Prohibited use', 'Matumizi yaliyokatazwa', 'የተከለከለ አጠቃቀም', 'Usage interdit'], ul: [
+          ['Beddelka astaanta, midabkeeda, ama ku darista summado kale.', 'Changing the logo, its colour, or combining it with other marks.', 'Kubadilisha nembo, rangi yake, au kuichanganya na alama nyingine.', 'አርማውን ወይም ቀለሙን መቀየር፣ ከሌሎች ምልክቶች ጋር ማጣመር።', 'Modifier le logo, sa couleur, ou le combiner avec d’autres marques.'],
+          ['Isticmaalka si loo muujiyo in Xaraash ay ansixisay alaab ama adeeg.', 'Using it to suggest Xaraash approves a product or service.', 'Kuitumia kudokeza kuwa Xaraash inaidhinisha bidhaa au huduma.', 'Xaraash ምርትን ወይም አገልግሎትን እንደሚደግፍ ለማሳየት መጠቀም።', 'L’utiliser pour suggérer que Xaraash approuve un produit ou service.'],
+          ['Isticmaal khiyaano ah ama waxyeello u geysta sumcadda bogga.', 'Misleading use, or use that harms the site’s reputation.', 'Matumizi ya kupotosha au yanayoharibu sifa ya tovuti.', 'አሳሳች አጠቃቀም ወይም የድረገጹን ስም የሚጎዳ አጠቃቀም።', 'Usage trompeur ou nuisible à la réputation du site.']
+        ] },
+        { h: ['Xuquuqda dadka kale', 'Other people’s rights', 'Haki za wengine', 'የሌሎች መብቶች', 'Droits des autres'], p: [['Ha ku darin xayeysiiskaaga summad ama sawir aadan xaq u lahayn. Haddii xuquuqdaada la jebiyo, soo gudbi cabasho oo ku lifaaq cadeymaha; kooxda Xaraash ayaa dib u eegaysa.', 'Do not put a logo or image in your post that you have no right to use. If your rights are infringed, file a complaint with supporting documents and the Xaraash team will review it.', 'Usiweke nembo au picha kwenye tangazo lako ambayo huna haki ya kuitumia. Haki zako zikikiukwa, wasilisha malalamiko na ushahidi, na timu ya Xaraash itayapitia.', 'የመጠቀም መብት የሌለዎትን አርማ ወይም ምስል በማስታወቂያዎ ውስጥ አያስገቡ። መብትዎ ከተጣሰ ከደጋፊ ሰነዶች ጋር ቅሬታ ያቅርቡ፣ የXaraash ቡድን ይመረምረዋል።', 'N’insérez pas de logo ou d’image dont vous n’avez pas le droit d’usage. Si vos droits sont violés, déposez une plainte avec justificatifs ; l’équipe Xaraash l’examinera.']] }
+      ]
+    }
+  };
+
+  var view = '';
+  function nav(h) {
+    view = h; try { location.hash = h; } catch (e) {}
+    renderView(); window.scrollTo(0, 0);
+  }
+  function renderView() {
+    var home = !view, d = view.indexOf('ad-') === 0;
+    $('viewHome').hidden = !home; $('viewDetail').hidden = !d; $('viewPage').hidden = !(!home && !d);
+    if (d) renderDetail(view.slice(3)); else if (!home) renderPage(view);
+  }
+  function backBtn() { return '<button class="back" type="button" data-back aria-label="' + esc(X[S.lang].back) + '">' + ARROW + '</button>'; }
+  function renderDetail(id) {
+    var li = LI(), x = X[S.lang], all = allPosts(), p = all.filter(function (q) { return String(q.id) === id; })[0];
+    if (!p) { nav(''); return; }
+    var who = p.mine ? t().you : p.user;
+    var pq = p.price == null ? null : priceParts(p);
+    var price = !pq ? t().neg : pq.main + (pq.sec ? '  (≈ ' + pq.sec + ')' : '');
+    var sim = all.filter(function (q) { return q.cat === p.cat && q.id !== p.id; }).slice(0, 4);
+    $('viewDetail').innerHTML = backBtn() +
+      '<div class="crumbs">' + esc(x.home) + ' / ' + esc(t().cat[p.cat]) + (p.tag ? ' / ' + esc(BRANDNAME[p.tag] || t().tg[p.tag] || '') : '') + '</div>' +
+      '<div class="dgrid"><article class="panel"><h1>' + esc(p.title[li] || p.title[0]) + '</h1>' +
+      '<div class="thumb big" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>' +
+      '<dl class="specs"><dt>' + esc(x.price) + '</dt><dd>' + esc(price) + '</dd><dt>' + esc(x.city) + '</dt><dd>' + esc(p.city) + '</dd><dt>' + esc(x.cat) + '</dt><dd>' + esc(t().cat[p.cat]) + '</dd><dt>' + esc(x.posted) + '</dt><dd>' + esc(ago(p.age)) + '</dd><dt>' + esc(x.seller) + '</dt><dd>' + esc(who) + '</dd></dl>' +
+      '<p>' + esc(x.desc.replace('{u}', who)) + '</p><p class="eg">' + esc(x.descTag) + '</p>' +
+      '<div class="btnrow"><button class="post" type="button" data-soon>' + esc(x.contact) + '</button><button class="ghost" type="button" data-soon>' + esc(x.report) + '</button></div>' +
+      '<div class="tip">' + esc(x.tip) + ' <button type="button" data-page="safety">' + esc(x.tipLink) + '</button></div></article>' +
+      '<aside class="panel"><h2 style="margin-top:0">' + esc(x.similar) + '</h2><div class="sim">' + sim.map(function (q) {
+        return '<button type="button" data-ad-go="' + q.id + '"><div class="thumb" style="--h:' + HUE[q.cat] + '">' + svg(q.cat) + '</div><span>' + esc(q.title[li] || q.title[0]) + '</span></button>';
+      }).join('') + '</div></aside></div>';
+  }
+  function renderPage(key) {
+    var p = PG[key]; if (!p) { nav(''); return; }
+    var li = LI(), x = X[S.lang];
+    var h = backBtn() + '<article class="panel doc"><h1>' + esc(p.title[li]) + '</h1><p class="lead">' + esc(p.lead[li]) + '</p>';
+    p.blocks.forEach(function (b) {
+      h += '<section><h2>' + esc(b.h[li]) + '</h2>';
+      if (b.chips) h += '<div class="pchips">' + b.chips.map(function (c) { return '<span style="--c:' + c[1] + '"><i></i>' + esc(c[0][li]) + '</span>'; }).join('') + '</div>';
+      if (b.p) b.p.forEach(function (q) { h += '<p>' + esc(q[li]) + '</p>'; });
+      if (b.ul) h += '<ul>' + b.ul.map(function (q) { return '<li>' + esc(q[li]) + '</li>'; }).join('') + '</ul>';
+      if (b.ol) h += '<ol>' + b.ol.map(function (q) { return '<li>' + esc(q[li]) + '</li>'; }).join('') + '</ol>';
+      if (b.login) h += '<div class="loginbox"><span>' + esc(x.loginAsk) + '</span><button type="button" data-soon>' + esc(t().login) + '</button></div>';
+      h += '</section>';
+    });
+    $('viewPage').innerHTML = h + '<p class="eg">' + esc(x.eg) + '</p></article>';
+  }
+  document.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-ad-go]'); if (g) nav('ad-' + g.getAttribute('data-ad-go'));
+  });
+  window.addEventListener('hashchange', function () {
+    var h = location.hash.slice(1); if (h !== view && (h === '' || h.indexOf('ad-') === 0 || PG[h])) { view = h; renderView(); }
+  });
+
+  /* ---------- Currency, language droplist, app tabs, chat ---------- */
+  function updateConv() {
+    var el = $('pf-conv'); if (!el) return;
+    var v = parseFloat($('pf-price').value), code = $('pf-cur').value, city = $('pf-city').value;
+    if (isNaN(v) || !CUR[code]) { el.textContent = ''; return; }
+    var usd = v / CUR[code].r, target = code === 'USD' ? subCur(city) : 'USD';
+    if (target === code) { el.textContent = ''; return; }
+    el.textContent = '≈ ' + money(usd, target) + '  ·  1 USD = ' + CUR[target === 'USD' ? code : target].r.toLocaleString('en-US') + ' ' + (target === 'USD' ? code : target);
+  }
+  $('pf-price').addEventListener('input', updateConv);
+  $('pf-cur').addEventListener('change', updateConv);
+  $('pf-city').addEventListener('change', function () { $('pf-cur').value = localCur($('pf-city').value); updateConv(); });
+  $('cur').addEventListener('change', function (e) { S.cur = e.target.value; renderList(); renderView(); });
+  $('langSel').addEventListener('change', function (e) { S.lang = e.target.value; ls('xaraash-lang', S.lang); renderText(); });
+
+  var LNAME = { so: 'Somali', en: 'English', sw: 'Swahili', am: 'Amharic', fr: 'French' };
+  var chat = [], busy = false;
+  function renderMsgs() {
+    $('msgs').innerHTML = chat.map(function (m) { return '<div class="msg ' + m.r + '">' + esc(m.t).replace(/\n/g, '<br>') + '</div>'; }).join('');
+    $('msgs').scrollTop = 1e9;
+  }
+  function renderQuick() {
+    var x = t();
+    $('quick').innerHTML = [x.bq1, x.bq2, x.bq3].map(function (q) { return '<button type="button" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('');
+  }
+  function refreshHello() { if (chat.length && chat[0].hello && chat.length === 1) { chat[0].t = t().botHello; renderMsgs(); } }
+  function chatToggle(open) {
+    $('chat').hidden = !open;
+    if (open) { if (!chat.length) { chat.push({ r: 'bot', t: t().botHello, hello: true }); renderMsgs(); } $('chatIn').focus(); }
+  }
+  async function ask(q) {
+    q = (q || '').trim(); if (busy || !q) return;
+    chat.push({ r: 'me', t: q });
+    var bot = { r: 'bot', t: '…' }; chat.push(bot); busy = true; renderMsgs();
+    var url = (window.XARAASH_CHAT_URL || '').trim();
+    if (!url) { bot.t = t().botDown; busy = false; renderMsgs(); return; }
+    var msgs = chat.slice(0, -1).filter(function (m) { return !m.hello; }).slice(-10).map(function (m) { return { role: m.r === 'me' ? 'user' : 'assistant', content: m.t.slice(0, 500) }; });
+    try {
+      var ctl = new AbortController(); var to = setTimeout(function () { ctl.abort(); }, 30000);
+      var resp = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ lang: S.lang, messages: msgs }), signal: ctl.signal });
+      clearTimeout(to);
+      var data = await resp.json();
+      bot.t = resp.ok && data && data.text ? data.text : t().botDown;
+    } catch (e) { bot.t = t().botDown; }
+    busy = false; renderMsgs();
+  }
+  $('chatFab').onclick = function () { chatToggle($('chat').hidden); };
+  $('chatClose').onclick = function () { chatToggle(false); };
+  $('chatForm').addEventListener('submit', function (e) { e.preventDefault(); var v = $('chatIn').value; $('chatIn').value = ''; ask(v); });
+  $('quick').addEventListener('click', function (e) { var b = e.target.closest('[data-q]'); if (b) ask(b.getAttribute('data-q')); });
+  $('tabbar').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]'); if (!b) return; var k = b.dataset.tab;
+    if (k === 'home') { chatToggle(false); nav(''); }
+    else if (k === 'search') { chatToggle(false); nav(''); window.scrollTo(0, 0); $('q').focus(); }
+    else if (k === 'add') { $('veil').hidden = false; $('pf-title').focus(); }
+    else if (k === 'chat') { chatToggle($('chat').hidden); }
+    else if (k === 'login') { toast(t().loginSoon); }
+  });
+
+  var sl = ls('xaraash-lang'); if (sl && T[sl]) S.lang = sl;
+  try { var h0 = location.hash.slice(1); if (h0.indexOf('ad-') === 0 || PG[h0]) view = h0; } catch (e) {}
+  renderText();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>

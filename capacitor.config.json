@@ -1,0 +1,6 @@
+{
+  "appId": "com.xaraash.app",
+  "appName": "Xaraash",
+  "webDir": "www",
+  "server": { "androidScheme": "https" }
+}
