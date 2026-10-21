@@ -532,6 +532,14 @@ button { cursor: pointer; }
     fr: { fPhotos: 'Photos (jusqu’à 5)', takePhoto: 'Prendre une photo', pickPhoto: 'Choisir des photos', photoMax: '5 photos maximum.', photoErr: 'Cette photo est illisible. Essayez-en une autre.', photoRm: 'Retirer' }
   };
   Object.keys(NEWP).forEach(function (k) { Object.assign(T[k], NEWP[k]); });
+  var NEWS = {
+    so: { sharing: 'Waa la diraya… xayeysiiskaaga waa la wadaagayaa.', shared: 'Xayeysiiskaaga waa la daabacay, qof walba wuu arki karaa.', shareFail: 'Lama gaarsiin karin keydinta. Waxaa lagu daray aaladdan oo keliya.' },
+    en: { sharing: 'Sending… sharing your post.', shared: 'Your post is published and visible to everyone.', shareFail: 'Could not reach the storage. Your post was added on this device only.' },
+    sw: { sharing: 'Inatuma… tangazo lako linashirikiwa.', shared: 'Tangazo lako limechapishwa na kila mtu anaweza kuliona.', shareFail: 'Imeshindwa kufikia hifadhi. Tangazo lako limeongezwa kwenye kifaa hiki tu.' },
+    am: { sharing: 'በመላክ ላይ… ማስታወቂያዎ እየተጋራ ነው።', shared: 'ማስታወቂያዎ ታትሟል፣ ሁሉም ሰው ማየት ይችላል።', shareFail: 'ማከማቻውን ማግኘት አልተቻለም። ማስታወቂያዎ በዚህ መሣሪያ ላይ ብቻ ተጨምሯል።' },
+    fr: { sharing: 'Envoi… partage de votre annonce.', shared: 'Votre annonce est publiée et visible par tous.', shareFail: 'Stockage injoignable. Votre annonce n’a été ajoutée que sur cet appareil.' }
+  };
+  Object.keys(NEWS).forEach(function (k) { Object.assign(T[k], NEWS[k]); });
 
   var SIDE = [
     { key: 'gBrands', cat: 'cars', tags: ['toyota','nissan','ford','lexus','chevrolet','mercedes','gmc','bmw','dodge'], brand: true },
@@ -568,7 +576,7 @@ button { cursor: pointer; }
     [22,'jobs','','Addis Ababa',null,'Selam H.',0,480,['Shaqo: iibiye dukaan','Job: shop assistant','Ajira: msaidizi wa duka','ሥራ፡ የሱቅ ረዳት','Emploi : vendeur en boutique']]
   ];
 
-  var S = { lang: 'so', cur: 'auto', cat: 'all', tag: '', q: '', region: '', sort: 'new', shown: 8, mine: [] };
+  var S = { lang: 'so', cur: 'auto', cat: 'all', tag: '', q: '', region: '', sort: 'new', shown: 8, mine: [], remote: [] };
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
   function thumbHtml(p) {
@@ -600,7 +608,7 @@ button { cursor: pointer; }
   }
 
   function items() {
-    var all = S.mine.concat(DATA.map(function (d) {
+    var all = S.mine.concat(S.remote, DATA.map(function (d) {
       return { id: d[0], cat: d[1], tag: d[2], city: d[3], price: d[4], user: d[5], re: d[6], age: d[7], title: d[8], mine: false };
     }));
     var q = S.q.trim().toLowerCase();
@@ -708,10 +716,12 @@ button { cursor: pointer; }
     e.preventDefault();
     var title = $('pf-title').value.trim(); if (!title) return;
     var pr = $('pf-price').value, pcode = $('pf-cur').value, usd = pr === '' ? null : Math.round(Number(pr) / CUR[pcode].r * 100) / 100;
-    S.mine.unshift({ id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true, photos: photos.slice() });
+    var post = { id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true, photos: photos.slice() };
+    S.mine.unshift(post);
     $('postForm').reset(); photos = []; renderPhotos(); $('veil').hidden = true; S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
     $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false');
-    renderRail(); renderSide(); renderRegion(); renderList(); toast(t().added);
+    renderRail(); renderSide(); renderRegion(); renderList(); toast(API() ? t().sharing : t().added);
+    if (API()) shareRemote(post);
   });
 
   var themes = [null, 'dark', 'light'];
@@ -748,7 +758,7 @@ button { cursor: pointer; }
   function LI() { return { so: 0, en: 1, sw: 2, am: 3, fr: 4 }[S.lang]; }
   var ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
   function allPosts() {
-    return S.mine.concat(DATA.map(function (d) { return { id: d[0], cat: d[1], tag: d[2], city: d[3], price: d[4], user: d[5], re: d[6], age: d[7], title: d[8], mine: false }; }));
+    return S.mine.concat(S.remote, DATA.map(function (d) { return { id: d[0], cat: d[1], tag: d[2], city: d[3], price: d[4], user: d[5], re: d[6], age: d[7], title: d[8], mine: false }; }));
   }
   // Pages: title [so,en,sw], lead, blocks {h, p[], ul[], ol[], chips[], login}
   var PG = {
@@ -877,6 +887,41 @@ button { cursor: pointer; }
   window.addEventListener('hashchange', function () {
     var h = location.hash.slice(1); if (h !== view && (h === '' || h.indexOf('ad-') === 0 || PG[h])) { view = h; renderView(); }
   });
+
+  /* ---------- Shared storage (Google Sheets + Drive through Apps Script) ---------- */
+  function API() { return (window.XARAASH_API_URL || '').trim(); }
+  async function shareRemote(post) {
+    try {
+      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'add', title: post.title[0], cat: post.cat, city: post.city, priceUsd: post.price, photos: post.photos || [] }) });
+      var d = await r.json();
+      if (!d || !d.ok) throw new Error('rejected');
+      S.mine = S.mine.filter(function (m) { return m !== post; });
+      await loadRemote(); toast(t().shared);
+    } catch (e) { toast(t().shareFail); }
+  }
+  async function loadRemote() {
+    var u = API(); if (!u) return;
+    try {
+      var r = await fetch(u + (u.indexOf('?') >= 0 ? '&' : '?') + 'action=list');
+      var d = await r.json();
+      if (!d || !Array.isArray(d.posts)) return;
+      var now = Date.now();
+      S.remote = d.posts.slice(0, 200).map(function (p) {
+        var title = String(p.title || '').slice(0, 80); if (!title) return null;
+        var price = p.priceUsd === null || p.priceUsd === '' || p.priceUsd === undefined ? null : Number(p.priceUsd);
+        return {
+          id: 'r' + String(p.id).replace(/[^\w-]/g, '').slice(0, 20),
+          cat: CATS.indexOf(p.cat) > 0 ? p.cat : 'services',
+          tag: '', city: String(p.city || '').slice(0, 40), price: isFinite(price) ? price : null,
+          user: String(p.user || 'Member').slice(0, 30), re: 0, mine: false,
+          age: Math.max(0, Math.round((now - Number(p.ts)) / 60000)) || 0,
+          title: [title, title, title, title, title],
+          photos: (Array.isArray(p.photos) ? p.photos : []).filter(function (x) { return /^[\w-]{10,80}$/.test(String(x)); }).slice(0, 5).map(function (x) { return 'https://drive.google.com/thumbnail?id=' + x + '&sz=w1000'; })
+        };
+      }).filter(Boolean);
+      renderList();
+    } catch (e) {}
+  }
 
   /* ---------- Photos: camera or gallery, resized in the browser ---------- */
   var photos = [], MAXP = 5;
@@ -1066,6 +1111,9 @@ button { cursor: pointer; }
   var sl = ls('xaraash-lang'); if (sl && T[sl]) S.lang = sl;
   try { var h0 = location.hash.slice(1); if (h0.indexOf('ad-') === 0 || PG[h0]) view = h0; } catch (e) {}
   renderText();
+  loadRemote();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) loadRemote(); });
+  setInterval(function () { if (!document.hidden) loadRemote(); }, 60000);
 })();
 </script>
 
