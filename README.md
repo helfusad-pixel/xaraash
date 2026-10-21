@@ -11,7 +11,6 @@ East Africa classifieds app. Somalia prices are in US dollars only; other countr
 |---|---|
 | `www/` | App-ka laftiisa (HTML/CSS/JS, PWA) / the app itself |
 | `www/config.js` | Halkan geli URL-ka chatbot-ka / put your chat server URL here |
-| `apps-script/Code.gs` | Keydinta Google Sheets + Drive (xayeysiisyo iyo sawiro) / shared storage |
 | `api/chat.js` | Server-ka chatbot-ka (furaha API halkan ayuu joogaa) / chat server, API key lives here |
 | `capacitor.config.json` | Beddelka web-ka ilaa Android/iOS / wraps the web app for Android and iOS |
 | `.github/workflows/pages.yml` | Daabac web-ka GitHub Pages / publish the web app |
@@ -48,26 +47,6 @@ Chatbot-ku wuxuu u baahan yahay server yar, maxaa yeelay furaha API ma gali karo
 5. Commit + push.
 
 Ilaalin: server-ku wuxuu xaddidaa 12 fariin/daqiiqad IP kasta (best-effort), 500 xaraf fariin kasta, iyo 400 token jawaab kasta. Hubi kharashka API-ga ee akoonkaaga. Ha geli furaha API `www/` gudahiisa.
-
-## 3b. Keydin Google Drive (xayeysiisyo iyo sawiro oo aaladaha oo dhan ka muuqda)
-
-Bilaash, adigoo isticmaalaya akoonkaaga Google. Xayeysiisyada waxay galaan Google Sheet, sawirradana Drive.
-
-1. Tag sheets.new, magac u bixi "Xaraash posts".
-2. **Extensions → Apps Script**. Tirtir koodhka jira, ku dheji waxa ku jira `apps-script/Code.gs`, dhagsii Save.
-3. Kor ka dooro function-ka **setup** → **Run**. Oggolow marka Google weydiiyo (haddii uu leeyahay "Google hasn’t verified this app": **Advanced → Go to … (unsafe)**; waa script-kaaga).
-4. **Deploy → New deployment → Web app**. Execute as: **Me**. Who has access: **Anyone**. **Deploy**. Nuqul ka qaad **Web app URL** (ku dhammaata `/exec`).
-5. Geli URL-kaas `www/config.js`:
-   ```js
-   window.XARAASH_API_URL = 'https://script.google.com/macros/s/.../exec';
-   ```
-6. Upload `www/config.js` iyo `www/index.html` GitHub, sug Pages 1 ilaa 2 daqiiqo.
-
-Xusuusin:
-- Haddii aad Code.gs beddesho, **Deploy → Manage deployments → Edit → New version**.
-- Link-ga `/exec` waa public (ku jira config.js), qof walba wuu soo dirri karaa xayeysiis. Server-ku wuxuu xaddidaa 20 xayeysiis daqiiqadii, 5 sawir, 80 xaraf cinwaan. Si aad xayeysiis u qarisid, Sheet-ka **posts** ku qor `hidden` safka ugu dambeeya (status). Tijaabo ahaan ayuu u fiican yahay; mashruuc dhab ah waxaa lagula talinayaa database sida Supabase.
-- Sawirradu waxay noqdaan "anyone with the link" Drive-kaaga, waxayna isticmaalaan booskaaga Drive-ka.
-- Kamarada/sawirka, Apps Script iyo Drive thumbnails lama tijaabin halkan; tijaabi taleefankaaga ka hor intaadan dadka u dirin.
 
 ## 4. Mobile app
 
