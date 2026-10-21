@@ -224,6 +224,20 @@ button { cursor: pointer; }
   .find .post { display: none; }
 }
 
+/* Photos */
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.photobtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.pbtn { cursor: pointer; padding: 10px 14px; border-radius: 12px; display: inline-flex; align-items: center; }
+.pbtn:focus-within { outline: 3px solid var(--cta); outline-offset: 2px; }
+.pthumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+.pthumbs:empty { display: none; }
+.pt { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+.pt img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pt button { position: absolute; top: 4px; inset-inline-end: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(8,16,30,.72); color: #fff; font-size: 1rem; line-height: 1; display: grid; place-items: center; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+.thumb.photo { overflow: hidden; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-block: 16px; }
+.gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; display: block; background: var(--surface-2); }
 /* Detail + info pages */
 .tlink { background: none; border: 0; padding: 0; text-align: start; color: inherit; font: inherit; cursor: pointer; }
 .tlink:hover { text-decoration: underline; }
@@ -345,6 +359,7 @@ button { cursor: pointer; }
     <label class="field"><span data-i="fTitle"></span><input id="pf-title" required maxlength="80"></label>
     <label class="field"><span data-i="fCat"></span><select id="pf-cat"></select></label>
     <label class="field"><span data-i="fCity"></span><select id="pf-city"></select></label>
+    <div class="field"><span data-i="fPhotos"></span><div class="photobtns"><label class="ghost pbtn"><input id="pf-cam" class="vh" type="file" accept="image/*" capture="environment"><span data-i="takePhoto"></span></label><label class="ghost pbtn"><input id="pf-gal" class="vh" type="file" accept="image/*" multiple><span data-i="pickPhoto"></span></label></div><div class="pthumbs" id="pf-thumbs"></div><small class="conv" id="pf-pmsg" aria-live="polite"></small></div>
     <div class="field"><span data-i="fPrice"></span><div class="pricerow"><input id="pf-price" type="number" min="0" step="any" inputmode="decimal" aria-label="Price"><select id="pf-cur" aria-label="Currency"></select></div><small class="conv" id="pf-conv"></small></div>
     <div class="acts"><button type="button" class="ghost" id="pf-cancel" data-i="cancel"></button><button type="submit" class="post" data-i="publish"></button></div>
   </form>
@@ -509,6 +524,15 @@ button { cursor: pointer; }
   };
   Object.keys(NEWI).forEach(function (k) { Object.assign(T[k], NEWI[k]); });
 
+  var NEWP = {
+    so: { fPhotos: 'Sawirrada (ilaa 5)', takePhoto: 'Sawir qaado', pickPhoto: 'Dooro sawiro', photoMax: 'Ugu badnaan 5 sawir.', photoErr: 'Sawirka lama akhrin karo. Isku day mid kale.', photoRm: 'Ka saar' },
+    en: { fPhotos: 'Photos (up to 5)', takePhoto: 'Take photo', pickPhoto: 'Choose photos', photoMax: 'Up to 5 photos.', photoErr: 'That photo could not be read. Try another.', photoRm: 'Remove' },
+    sw: { fPhotos: 'Picha (hadi 5)', takePhoto: 'Piga picha', pickPhoto: 'Chagua picha', photoMax: 'Hadi picha 5.', photoErr: 'Picha haikuweza kusomwa. Jaribu nyingine.', photoRm: 'Ondoa' },
+    am: { fPhotos: 'ፎቶዎች (እስከ 5)', takePhoto: 'ፎቶ አንሳ', pickPhoto: 'ፎቶ ምረጥ', photoMax: 'እስከ 5 ፎቶ።', photoErr: 'ፎቶው ሊነበብ አልቻለም። ሌላ ይሞክሩ።', photoRm: 'አስወግድ' },
+    fr: { fPhotos: 'Photos (jusqu’à 5)', takePhoto: 'Prendre une photo', pickPhoto: 'Choisir des photos', photoMax: '5 photos maximum.', photoErr: 'Cette photo est illisible. Essayez-en une autre.', photoRm: 'Retirer' }
+  };
+  Object.keys(NEWP).forEach(function (k) { Object.assign(T[k], NEWP[k]); });
+
   var SIDE = [
     { key: 'gBrands', cat: 'cars', tags: ['toyota','nissan','ford','lexus','chevrolet','mercedes','gmc','bmw','dodge'], brand: true },
     { key: 'gTypes', cat: 'cars', tags: ['parts','trucks','moto','classic','crashed','lease'] },
@@ -547,6 +571,10 @@ button { cursor: pointer; }
   var S = { lang: 'so', cur: 'auto', cat: 'all', tag: '', q: '', region: '', sort: 'new', shown: 8, mine: [] };
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  function thumbHtml(p) {
+    if (p.photos && p.photos.length) return '<div class="thumb photo"><img src="' + p.photos[0] + '" alt="" loading="lazy"></div>';
+    return '<div class="thumb" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>';
+  }
   function svg(name) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[name] + '</svg>'; }
   function t() { return T[S.lang]; }
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
@@ -617,7 +645,7 @@ button { cursor: pointer; }
         '<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>' + esc(p.city) + '</span>' +
         '<span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>' + esc(ago(p.age)) + '</span>' +
         '<span><i class="av">' + esc(who.charAt(0).toUpperCase()) + '</i>' + esc(who) + '</span>' + rep + price +
-        '</div></div><div class="thumb" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div></li>';
+        '</div></div>' + thumbHtml(p) + '</li>';
     }).join('');
     $('moreBtn').hidden = res.length <= S.shown;
   }
@@ -680,8 +708,8 @@ button { cursor: pointer; }
     e.preventDefault();
     var title = $('pf-title').value.trim(); if (!title) return;
     var pr = $('pf-price').value, pcode = $('pf-cur').value, usd = pr === '' ? null : Math.round(Number(pr) / CUR[pcode].r * 100) / 100;
-    S.mine.unshift({ id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true });
-    $('postForm').reset(); $('veil').hidden = true; S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
+    S.mine.unshift({ id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true, photos: photos.slice() });
+    $('postForm').reset(); photos = []; renderPhotos(); $('veil').hidden = true; S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
     $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false');
     renderRail(); renderSide(); renderRegion(); renderList(); toast(t().added);
   });
@@ -819,13 +847,13 @@ button { cursor: pointer; }
     $('viewDetail').innerHTML = backBtn() +
       '<div class="crumbs">' + esc(x.home) + ' / ' + esc(t().cat[p.cat]) + (p.tag ? ' / ' + esc(BRANDNAME[p.tag] || t().tg[p.tag] || '') : '') + '</div>' +
       '<div class="dgrid"><article class="panel"><h1>' + esc(p.title[li] || p.title[0]) + '</h1>' +
-      '<div class="thumb big" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>' +
+      (p.photos && p.photos.length ? '<div class="gallery">' + p.photos.map(function (u) { return '<img src="' + u + '" alt="">'; }).join('') + '</div>' : '<div class="thumb big" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>') +
       '<dl class="specs"><dt>' + esc(x.price) + '</dt><dd>' + esc(price) + '</dd><dt>' + esc(x.city) + '</dt><dd>' + esc(p.city) + '</dd><dt>' + esc(x.cat) + '</dt><dd>' + esc(t().cat[p.cat]) + '</dd><dt>' + esc(x.posted) + '</dt><dd>' + esc(ago(p.age)) + '</dd><dt>' + esc(x.seller) + '</dt><dd>' + esc(who) + '</dd></dl>' +
       '<p>' + esc(x.desc.replace('{u}', who)) + '</p><p class="eg">' + esc(x.descTag) + '</p>' +
       '<div class="btnrow"><button class="post" type="button" data-soon>' + esc(x.contact) + '</button><button class="ghost" type="button" data-soon>' + esc(x.report) + '</button></div>' +
       '<div class="tip">' + esc(x.tip) + ' <button type="button" data-page="safety">' + esc(x.tipLink) + '</button></div></article>' +
       '<aside class="panel"><h2 style="margin-top:0">' + esc(x.similar) + '</h2><div class="sim">' + sim.map(function (q) {
-        return '<button type="button" data-ad-go="' + q.id + '"><div class="thumb" style="--h:' + HUE[q.cat] + '">' + svg(q.cat) + '</div><span>' + esc(q.title[li] || q.title[0]) + '</span></button>';
+        return '<button type="button" data-ad-go="' + q.id + '">' + thumbHtml(q) + '<span>' + esc(q.title[li] || q.title[0]) + '</span></button>';
       }).join('') + '</div></aside></div>';
   }
   function renderPage(key) {
@@ -848,6 +876,43 @@ button { cursor: pointer; }
   });
   window.addEventListener('hashchange', function () {
     var h = location.hash.slice(1); if (h !== view && (h === '' || h.indexOf('ad-') === 0 || PG[h])) { view = h; renderView(); }
+  });
+
+  /* ---------- Photos: camera or gallery, resized in the browser ---------- */
+  var photos = [], MAXP = 5;
+  function renderPhotos() {
+    $('pf-thumbs').innerHTML = photos.map(function (u, i) {
+      return '<div class="pt"><img src="' + u + '" alt=""><button type="button" data-rm="' + i + '" aria-label="' + esc(t().photoRm) + '">×</button></div>';
+    }).join('');
+  }
+  function shrink(file) {
+    return new Promise(function (ok, fail) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var m = 1000, k = Math.min(1, m / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); fail(new Error('read')); };
+      img.src = url;
+    });
+  }
+  async function addFiles(list) {
+    var msg = $('pf-pmsg'); msg.textContent = '';
+    var files = Array.prototype.slice.call(list || []).filter(function (f) { return /^image\//.test(f.type) || !f.type; });
+    for (var i = 0; i < files.length; i++) {
+      if (photos.length >= MAXP) { msg.textContent = t().photoMax; break; }
+      try { photos.push(await shrink(files[i])); } catch (e) { msg.textContent = t().photoErr; }
+    }
+    renderPhotos();
+  }
+  ['pf-cam', 'pf-gal'].forEach(function (id) {
+    $(id).addEventListener('change', function (e) { addFiles(e.target.files).then(function () { e.target.value = ''; }); });
+  });
+  $('pf-thumbs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-rm]'); if (!b) return;
+    photos.splice(Number(b.getAttribute('data-rm')), 1); $('pf-pmsg').textContent = ''; renderPhotos();
   });
 
   /* ---------- Currency, language droplist, app tabs, chat ---------- */
@@ -880,12 +945,101 @@ button { cursor: pointer; }
     $('chat').hidden = !open;
     if (open) { if (!chat.length) { chat.push({ r: 'bot', t: t().botHello, hello: true }); renderMsgs(); } $('chatIn').focus(); }
   }
+  /* ---------- Free built-in assistant (no server, no cost) ---------- */
+  var LB = {
+    post: {
+      kw: ['post', 'advert', 'sell', 'xayeysiis', 'soo dir', 'iibi', 'tangazo', 'weka', 'uza', 'ማስታወቂያ', 'ለጥፍ', 'መሸጥ', 'annonce', 'publier', 'vendre'],
+      so: 'Si aad xayeysiis u soo dirto: taabo “Soo dir xayeysiis”, geli cinwaanka, qaybta, magaalada iyo qiimaha, kadibna “Daabac”. Qiimaha waxaad ku qori kartaa lacagta aad dooratid, oo si toos ah ayaa loogu beddelaa lacagta dalka.',
+      en: 'To post an ad: tap Add Post, enter the title, category, city and price, then Publish. You can type the price in any listed currency and it is converted to the local currency automatically.',
+      sw: 'Kuweka tangazo: bonyeza “Weka tangazo”, andika kichwa, kategoria, mji na bei, kisha “Chapisha”. Unaweza kuandika bei kwa sarafu yoyote na itabadilishwa kuwa sarafu ya nchi kiotomatiki.',
+      am: 'ማስታወቂያ ለመለጠፍ፡ “ማስታወቂያ ለጥፍ” ይጫኑ፣ ርዕስ፣ ምድብ፣ ከተማና ዋጋ ያስገቡ፣ ከዚያ “ለጥፍ”። ዋጋውን በማንኛውም ገንዘብ መጻፍ ይችላሉ፣ በራስ-ሰር ወደ የአገሩ ገንዘብ ይቀየራል።',
+      fr: 'Pour publier une annonce : touchez « Publier une annonce », saisissez le titre, la catégorie, la ville et le prix, puis « Publier ». Vous pouvez saisir le prix dans n’importe quelle devise listée, il est converti automatiquement.'
+    },
+    safety: {
+      kw: ['safe', 'scam', 'fraud', 'secur', 'badbaad', 'khayaan', 'xarun', 'salama', 'usalama', 'ulaghai', 'ደህንነት', 'ማጭበርበር', 'sécur', 'arnaque', 'fraude', 'sûr'],
+      so: 'Si ammaan ah u iibso: ku kulan goob dadweyne oo mashquul ah, ha bixin lacag ka hor intaadan alaabta arkin, ha la wadaagin cidna koodh xaqiijin, oo isticmaal Adeegga Iibsiga Aaminka ah haddii aydan kulmi karin. Eeg Xarunta Badbaadada ee footer-ka.',
+      en: 'To buy safely: meet in a busy public place, never pay before you see the item, never share verification codes, and use the Trusted Purchase Service when you cannot meet. See the Safety Center in the footer.',
+      sw: 'Kununua kwa usalama: kutana mahali pa watu wengi, usilipe kabla ya kuona bidhaa, usishiriki misimbo ya uthibitisho, na tumia Huduma ya Ununuzi Unaoaminika usipoweza kukutana. Tazama Kituo cha Usalama chini ya ukurasa.',
+      am: 'በደህንነት ለመግዛት፡ ሰዎች በሚበዙበት የሕዝብ ቦታ ይገናኙ፣ እቃውን ሳያዩ አይክፈሉ፣ የማረጋገጫ ኮድ ለማንም አያጋሩ፣ መገናኘት ካልቻሉ የታመነ ግዢ አገልግሎትን ይጠቀሙ። ከታች የደህንነት ማዕከልን ይመልከቱ።',
+      fr: 'Pour acheter en sécurité : rencontrez-vous dans un lieu public fréquenté, ne payez jamais avant d’avoir vu l’article, ne partagez jamais de code de vérification, et utilisez le Service d’achat de confiance si vous ne pouvez pas vous voir. Voir le Centre de sécurité en bas de page.'
+    },
+    escrow: {
+      kw: ['trusted', 'escrow', 'aamin', 'unaoaminika', 'የታመነ', 'confiance', 'séquestre'],
+      so: 'Adeegga Iibsiga Aaminka ah wuxuu haystaa lacagta iibsadaha ilaa uu xaqiijiyo inuu alaabta helay, kadibna wuxuu u siidaayaa iibiyaha. Weli waa la dhisayaa.',
+      en: 'The Trusted Purchase Service holds the buyer’s payment until the buyer confirms the item arrived, then releases it to the seller. It is still being built.',
+      sw: 'Huduma ya Ununuzi Unaoaminika inashikilia malipo ya mnunuzi hadi athibitishe kupokea bidhaa, kisha inamwachilia muuzaji. Bado inajengwa.',
+      am: 'የታመነ ግዢ አገልግሎት ገዢው እቃው መድረሱን እስኪያረጋግጥ ድረስ ክፍያውን ይይዛል፣ ከዚያ ለሻጩ ይለቃል። ገና በመገንባት ላይ ነው።',
+      fr: 'Le Service d’achat de confiance conserve le paiement de l’acheteur jusqu’à ce qu’il confirme la réception, puis le libère au vendeur. Il est encore en construction.'
+    },
+    discount: {
+      kw: ['discount', 'commission', 'dhimis', 'komish', 'punguzo', 'kamisheni', 'ቅናሽ', 'remise'],
+      so: 'Nidaamka dhimista wuxuu hoos u dhigaa komishanka iibka ee iibiyeyaasha gawaarida, iyadoo lagu salaynayo iibka, bixinta khidmadaha waqtigeeda iyo cabashooyin la’aan. Eeg “Dhimis” footer-ka.',
+      en: 'The discount system lowers the sales commission for vehicle sellers, based on sales, on-time fee payment and no complaints. See Discount in the footer.',
+      sw: 'Mfumo wa punguzo hupunguza kamisheni ya mauzo kwa wauzaji wa magari, kulingana na mauzo, ada zilizolipwa kwa wakati na kutokuwa na malalamiko. Tazama “Punguzo” chini ya ukurasa.',
+      am: 'የቅናሽ ስርዓት ለተሽከርካሪ ሻጮች የሽያጭ ኮሚሽንን ይቀንሳል፣ በሽያጭ፣ በጊዜ በተከፈለ ክፍያና ቅሬታ በሌለበት ላይ ተመስርቶ። ከታች “ቅናሽ” ይመልከቱ።',
+      fr: 'Le système de remises réduit la commission de vente des vendeurs de véhicules selon les ventes, le paiement des frais à temps et l’absence de plaintes. Voir « Remise » en bas de page.'
+    },
+    app: {
+      kw: ['install', 'download', 'home screen', 'rakib', 'pakua', 'መተግበሪያ', 'télécharg', 'installer', 'application'],
+      so: 'Fur boggan taleefankaaga: Android (Chrome) dooro menu-ga ⋮ → “Add to Home Screen”; iPhone (Safari) dooro Share → “Add to Home Screen”.',
+      en: 'Open this page on your phone: on Android (Chrome) use the ⋮ menu → “Add to Home Screen”; on iPhone (Safari) use Share → “Add to Home Screen”.',
+      sw: 'Fungua ukurasa huu kwenye simu: Android (Chrome) tumia menyu ⋮ → “Add to Home Screen”; iPhone (Safari) tumia Share → “Add to Home Screen”.',
+      am: 'ይህን ገጽ በስልክዎ ይክፈቱ፡ Android (Chrome) ⋮ ምናሌ → “Add to Home Screen”፤ iPhone (Safari) Share → “Add to Home Screen”።',
+      fr: 'Ouvrez cette page sur votre téléphone : Android (Chrome) menu ⋮ → « Ajouter à l’écran d’accueil » ; iPhone (Safari) Partager → « Sur l’écran d’accueil ».'
+    },
+    currency: {
+      kw: ['price', 'currency', 'dollar', 'rate', 'convert', 'exchange', 'qiimo', 'lacag', 'sarif', 'bei', 'sarafu', 'ዋጋ', 'ገንዘብ', 'ምንዛሪ', 'prix', 'devise', 'taux', 'change'],
+      so: 'Soomaaliya waxaa lagu qiimeeyaa dollar keliya. Dalalka kale waxay muujiyaan lacagtooda iyo dollar-ka. Sarifku waa sawir-qaad 2026-10-20, ma aha toos. Tijaabi: “100 USD to ETB”.',
+      en: 'Somalia is priced in US dollars only. Other countries show their local currency with dollars next to it. Rates are a 2026-10-20 snapshot, not live. Try: “100 USD to ETB”.',
+      sw: 'Somalia inatumia dola za Marekani pekee. Nchi nyingine zinaonyesha sarafu yao na dola pembeni. Viwango ni picha ya 2026-10-20, si moja kwa moja. Jaribu: “100 USD to ETB”.',
+      am: 'ሶማሊያ በአሜሪካ ዶላር ብቻ ነው የምትጠቀመው። ሌሎች አገሮች የራሳቸውን ገንዘብ ከዶላር ጋር ያሳያሉ። ተመኖቹ የ2026-10-20 ቅጽበታዊ ናቸው፣ ቀጥታ አይደሉም። ይሞክሩ፡ “100 USD to ETB”።',
+      fr: 'La Somalie est en dollars US uniquement. Les autres pays affichent leur devise locale avec le dollar à côté. Les taux sont un instantané du 2026-10-20, pas en direct. Essayez : « 100 USD to ETB ».'
+    },
+    hello: {
+      so: 'Salaan! Waxaad i weydiin kartaa sida xayeysiis loo soo dirto, sida ammaan ah loo iibsado, ama sida lacagaha loo beddelo.',
+      en: 'Hi! Ask me how to post an ad, buy safely, or convert prices.',
+      sw: 'Habari! Niulize jinsi ya kuweka tangazo, kununua kwa usalama, au kubadilisha bei.',
+      am: 'ሰላም! ማስታወቂያ እንዴት እንደሚለጥፉ፣ በደህንነት እንዴት እንደሚገዙ ወይም ዋጋ እንዴት እንደሚቀይሩ ይጠይቁኝ።',
+      fr: 'Bonjour ! Demandez-moi comment publier une annonce, acheter en sécurité ou convertir des prix.'
+    },
+    none: {
+      so: 'Ma fahmin. Waxaan kaa caawin karaa: soo dirista xayeysiis, iibsiga ammaanka ah, Adeegga Iibsiga Aaminka ah, dhimista iyo beddelka lacagaha. Tijaabi: “100 USD to ETB”.',
+      en: 'I did not understand. I can help with posting an ad, buying safely, the Trusted Purchase Service, the discount system and currency conversion. Try: “100 USD to ETB”.',
+      sw: 'Sijaelewa. Naweza kusaidia kuweka tangazo, kununua kwa usalama, Huduma ya Ununuzi Unaoaminika, mfumo wa punguzo na kubadilisha sarafu. Jaribu: “100 USD to ETB”.',
+      am: 'አልገባኝም። ማስታወቂያ ለመለጠፍ፣ በደህንነት ለመግዛት፣ የታመነ ግዢ አገልግሎት፣ ቅናሽና ገንዘብ ለመቀየር መርዳት እችላለሁ። ይሞክሩ፡ “100 USD to ETB”።',
+      fr: 'Je n’ai pas compris. Je peux aider pour publier une annonce, acheter en sécurité, le Service d’achat de confiance, les remises et la conversion de devises. Essayez : « 100 USD to ETB ».'
+    }
+  };
+  var CNAMES = { usd: 'USD', dollar: 'USD', dollars: 'USD', '$': 'USD', dollar: 'USD', etb: 'ETB', birr: 'ETB', kes: 'KES', ksh: 'KES', tzs: 'TZS', tsh: 'TZS', ugx: 'UGX', ush: 'UGX', rwf: 'RWF', frw: 'RWF', djf: 'DJF', fdj: 'DJF' };
+  function calcAnswer(q) {
+    var m = q.match(/(\d[\d,]*(?:\.\d+)?)/); if (!m) return null;
+    var amt = parseFloat(m[1].replace(/,/g, '')); if (isNaN(amt)) return null;
+    var found = [], re = /\b(usd|dollars?|etb|birr|kes|ksh|tzs|tsh|ugx|ush|rwf|frw|djf|fdj)\b|\$/gi, k;
+    while ((k = re.exec(q))) { var c = CNAMES[k[0].toLowerCase()]; if (c && found.indexOf(c) < 0) found.push(c); }
+    if (!found.length) return null;
+    var from = found[0], usd = amt / CUR[from].r, outs = found.length > 1 ? [found[1]] : (from === 'USD' ? ['ETB', 'KES', 'TZS', 'UGX', 'RWF', 'DJF'] : ['USD']);
+    var fmt = function (v, c) { return (c === 'USD' && v < 100 ? Math.round(v * 100) / 100 : Math.round(v)).toLocaleString('en-US') + ' ' + c; };
+    return fmt(amt, from) + ' = ' + outs.map(function (c) { return fmt(usd * CUR[c].r, c); }).join(' · ') + '  (' + RATES_DATE + ')';
+  }
+  function localAnswer(q) {
+    var calc = calcAnswer(q); if (calc) return calc;
+    var low = q.toLowerCase().trim(), li = S.lang, best = null, bestN = 0;
+    ['escrow', 'discount', 'safety', 'app', 'currency', 'post'].forEach(function (key) {
+      var n = 0; LB[key].kw.forEach(function (w) { if (low.indexOf(w) >= 0) n++; });
+      if (key === 'app' && /\bapp\b/.test(low)) n++;
+      if (n > bestN) { bestN = n; best = key; }
+    });
+    if (best) return LB[best][li];
+    if (/^(hi|hello|hey|salaan|habari|jambo|ሰላም|bonjour|salut)/.test(low)) return LB.hello[li];
+    return LB.none[li];
+  }
+
   async function ask(q) {
     q = (q || '').trim(); if (busy || !q) return;
     chat.push({ r: 'me', t: q });
     var bot = { r: 'bot', t: '…' }; chat.push(bot); busy = true; renderMsgs();
     var url = (window.XARAASH_CHAT_URL || '').trim();
-    if (!url) { bot.t = t().botDown; busy = false; renderMsgs(); return; }
+    if (!url) { bot.t = localAnswer(q); busy = false; renderMsgs(); return; }
     var msgs = chat.slice(0, -1).filter(function (m) { return !m.hello; }).slice(-10).map(function (m) { return { role: m.r === 'me' ? 'user' : 'assistant', content: m.t.slice(0, 500) }; });
     try {
       var ctl = new AbortController(); var to = setTimeout(function () { ctl.abort(); }, 30000);
