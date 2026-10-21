@@ -224,6 +224,12 @@ button { cursor: pointer; }
   .find .post { display: none; }
 }
 
+/* Contact + owner actions */
+a.post, a.ghost { text-decoration: none; display: inline-flex; align-items: center; }
+a.post { padding: 12px 22px; }
+a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
+.btnrow .ghost { padding: 12px 18px; }
+.btnrow .danger { color: #c0392b; border-color: #c0392b; }
 /* Photos */
 .vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
 .photobtns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -270,6 +276,8 @@ button { cursor: pointer; }
 .pchips i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
 .loginbox { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--chip); color: var(--chip-ink); border-radius: 14px; padding: 12px 16px; font-weight: 600; max-width: 520px; }
 .loginbox button { background: var(--surface); border: 0; border-radius: 10px; padding: 8px 16px; font-weight: 700; color: var(--link); }
+.phone { color: var(--link); font-weight: 700; font-size: 1.25rem; font-variant-numeric: tabular-nums; text-decoration: none; }
+.phone:hover { text-decoration: underline; }
 .eg { color: var(--muted); font-size: .88rem; margin-top: 18px; }
 
 @media (max-width: 860px) {
@@ -357,11 +365,13 @@ button { cursor: pointer; }
   <form class="sheet" id="postForm" role="dialog" aria-modal="true" aria-labelledby="pf-h">
     <h2 id="pf-h" data-i="add"></h2>
     <label class="field"><span data-i="fTitle"></span><input id="pf-title" required maxlength="80"></label>
+    <label class="field"><span data-i="fName"></span><input id="pf-name" maxlength="40" autocomplete="name"></label>
+    <label class="field"><span data-i="fPhone"></span><input id="pf-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="+252 …"></label>
     <label class="field"><span data-i="fCat"></span><select id="pf-cat"></select></label>
     <label class="field"><span data-i="fCity"></span><select id="pf-city"></select></label>
-    <div class="field"><span data-i="fPhotos"></span><div class="photobtns"><label class="ghost pbtn"><input id="pf-cam" class="vh" type="file" accept="image/*" capture="environment"><span data-i="takePhoto"></span></label><label class="ghost pbtn"><input id="pf-gal" class="vh" type="file" accept="image/*" multiple><span data-i="pickPhoto"></span></label></div><div class="pthumbs" id="pf-thumbs"></div><small class="conv" id="pf-pmsg" aria-live="polite"></small></div>
+    <div class="field" id="pf-photos-field"><span data-i="fPhotos"></span><div class="photobtns"><label class="ghost pbtn"><input id="pf-cam" class="vh" type="file" accept="image/*" capture="environment"><span data-i="takePhoto"></span></label><label class="ghost pbtn"><input id="pf-gal" class="vh" type="file" accept="image/*" multiple><span data-i="pickPhoto"></span></label></div><div class="pthumbs" id="pf-thumbs"></div><small class="conv" id="pf-pmsg" aria-live="polite"></small></div>
     <div class="field"><span data-i="fPrice"></span><div class="pricerow"><input id="pf-price" type="number" min="0" step="any" inputmode="decimal" aria-label="Price"><select id="pf-cur" aria-label="Currency"></select></div><small class="conv" id="pf-conv"></small></div>
-    <div class="acts"><button type="button" class="ghost" id="pf-cancel" data-i="cancel"></button><button type="submit" class="post" data-i="publish"></button></div>
+    <div class="acts"><button type="button" class="ghost" id="pf-cancel" data-i="cancel"></button><button type="submit" class="post" id="pf-submit" data-i="publish"></button></div>
   </form>
 </div>
 <button class="chatfab" id="chatFab" type="button" aria-label="Chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg></button>
@@ -540,6 +550,14 @@ button { cursor: pointer; }
     fr: { sharing: 'Envoi… partage de votre annonce.', shared: 'Votre annonce est publiée et visible par tous.', shareFail: 'Stockage injoignable. Votre annonce n’a été ajoutée que sur cet appareil.' }
   };
   Object.keys(NEWS).forEach(function (k) { Object.assign(T[k], NEWS[k]); });
+  var NEWC = {
+    so: { fName: 'Magacaaga (ikhtiyaari)', fPhone: 'Lambarka taleefanka (ikhtiyaari)', editPost: 'Wax ka beddel xayeysiiska', save: 'Keydi', edit: 'Wax ka beddel', del: 'Tirtir', delSure: 'Hubi tirtirka', call: 'Wac', whatsapp: 'WhatsApp', phoneLbl: 'Taleefan', saved: 'Isbeddelka waa la keydiyay.', saveFail: 'Lama keydin karin isbeddelka. Isku day mar kale.', deleted: 'Xayeysiiska waa la tirtiray.' },
+    en: { fName: 'Your name (optional)', fPhone: 'Phone number (optional)', editPost: 'Edit post', save: 'Save', edit: 'Edit', del: 'Delete', delSure: 'Confirm delete', call: 'Call', whatsapp: 'WhatsApp', phoneLbl: 'Phone', saved: 'Changes saved.', saveFail: 'Could not save the changes. Try again.', deleted: 'Post deleted.' },
+    sw: { fName: 'Jina lako (hiari)', fPhone: 'Namba ya simu (hiari)', editPost: 'Hariri tangazo', save: 'Hifadhi', edit: 'Hariri', del: 'Futa', delSure: 'Thibitisha kufuta', call: 'Piga simu', whatsapp: 'WhatsApp', phoneLbl: 'Simu', saved: 'Mabadiliko yamehifadhiwa.', saveFail: 'Imeshindwa kuhifadhi mabadiliko. Jaribu tena.', deleted: 'Tangazo limefutwa.' },
+    am: { fName: 'ስምዎ (አማራጭ)', fPhone: 'ስልክ ቁጥር (አማራጭ)', editPost: 'ማስታወቂያ አርም', save: 'አስቀምጥ', edit: 'አርም', del: 'ሰርዝ', delSure: 'መሰረዝን አረጋግጥ', call: 'ደውል', whatsapp: 'WhatsApp', phoneLbl: 'ስልክ', saved: 'ለውጦች ተቀምጠዋል።', saveFail: 'ለውጦቹን ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ።', deleted: 'ማስታወቂያው ተሰርዟል።' },
+    fr: { fName: 'Votre nom (facultatif)', fPhone: 'Numéro de téléphone (facultatif)', editPost: 'Modifier l’annonce', save: 'Enregistrer', edit: 'Modifier', del: 'Supprimer', delSure: 'Confirmer la suppression', call: 'Appeler', whatsapp: 'WhatsApp', phoneLbl: 'Téléphone', saved: 'Modifications enregistrées.', saveFail: 'Impossible d’enregistrer les modifications. Réessayez.', deleted: 'Annonce supprimée.' }
+  };
+  Object.keys(NEWC).forEach(function (k) { Object.assign(T[k], NEWC[k]); });
 
   var SIDE = [
     { key: 'gBrands', cat: 'cars', tags: ['toyota','nissan','ford','lexus','chevrolet','mercedes','gmc','bmw','dodge'], brand: true },
@@ -678,7 +696,7 @@ button { cursor: pointer; }
     document.documentElement.lang = S.lang === 'sw' ? 'sw' : S.lang;
     document.querySelectorAll('[data-i]').forEach(function (el) { el.textContent = x[el.getAttribute('data-i')]; });
     document.querySelectorAll('[data-ip]').forEach(function (el) { el.placeholder = x[el.getAttribute('data-ip')]; });
-    var PAGEMAP = { 3: 'discount', 8: 'safety', 12: 'escrow', 15: 'ip' };
+    var PAGEMAP = { 3: 'discount', 5: 'contact', 8: 'safety', 12: 'escrow', 15: 'ip' };
     $('links').innerHTML = x.links.map(function (l, i) { return '<button class="linkbtn" type="button" ' + (PAGEMAP[i] ? 'data-page="' + PAGEMAP[i] + '"' : 'data-soon') + '>' + svg('l' + i) + '<span>' + esc(l) + '</span></button>'; }).join('');
     document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang); });
     renderRail(); renderSide(); renderRegion(); renderList(); renderView();
@@ -708,7 +726,7 @@ button { cursor: pointer; }
   $('sortCheap').onclick = function () { S.sort = 'cheap'; $('sortNew').setAttribute('aria-pressed', 'false'); $('sortCheap').setAttribute('aria-pressed', 'true'); renderList(); };
   $('moreBtn').onclick = function () { S.shown += 8; renderList(); };
 
-  $('addBtn').onclick = function () { $('veil').hidden = false; $('pf-title').focus(); };
+  $('addBtn').onclick = function () { openForm(null); };
   $('pf-cancel').onclick = function () { $('veil').hidden = true; };
   $('veil').addEventListener('click', function (e) { if (e.target === $('veil')) $('veil').hidden = true; });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $('veil').hidden = true; });
@@ -716,9 +734,16 @@ button { cursor: pointer; }
     e.preventDefault();
     var title = $('pf-title').value.trim(); if (!title) return;
     var pr = $('pf-price').value, pcode = $('pf-cur').value, usd = pr === '' ? null : Math.round(Number(pr) / CUR[pcode].r * 100) / 100;
-    var post = { id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true, photos: photos.slice() };
+    var cname = $('pf-name').value.trim().slice(0, 40), cphone = cleanPhone($('pf-phone').value);
+    try { localStorage.setItem('xaraash-contact', JSON.stringify({ name: cname, phone: cphone })); } catch (er) {}
+    if (editing) {
+      var rid0 = editing; closeForm();
+      updateRemote(rid0, { title: title, cat: $('pf-cat').value, city: $('pf-city').value, priceUsd: usd, name: cname, phone: cphone });
+      return;
+    }
+    var post = { id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: cname, phone: cphone, re: 0, age: 0, title: [title, title, title], mine: true, photos: photos.slice() };
     S.mine.unshift(post);
-    $('postForm').reset(); photos = []; renderPhotos(); $('veil').hidden = true; S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
+    $('postForm').reset(); photos = []; renderPhotos(); closeForm(); S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
     $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false');
     renderRail(); renderSide(); renderRegion(); renderList(); toast(API() ? t().sharing : t().added);
     if (API()) shareRemote(post);
@@ -762,6 +787,14 @@ button { cursor: pointer; }
   }
   // Pages: title [so,en,sw], lead, blocks {h, p[], ul[], ol[], chips[], login}
   var PG = {
+    contact: {
+      title: ['La xiriir', 'Contact', 'Wasiliana nasi', 'ያግኙን', 'Contact'],
+      lead: ['Su’aal, talo ama dhibaato ma qabtaa? Si toos ah noola soo xiriir.', 'Have a question, suggestion or problem? Contact us directly.', 'Una swali, pendekezo au tatizo? Wasiliana nasi moja kwa moja.', 'ጥያቄ፣ ሐሳብ ወይም ችግር አለዎት? በቀጥታ ያግኙን።', 'Une question, une suggestion ou un problème ? Contactez-nous directement.'],
+      blocks: [
+        { h: ['Xiriirka', 'Contact person', 'Mhusika', 'አግኚ', 'Personne à contacter'], contact: true },
+        { h: ['Ogeysiis', 'Note', 'Maelezo', 'ማስታወሻ', 'Remarque'], p: [['Ha la wadaagin koodhka xaqiijinta ama erayga sirta ah, xitaa haddii qof sheegto inuu Xaraash ka yimid.', 'Never share a verification code or password, even with someone who says they are from Xaraash.', 'Usishiriki msimbo wa uthibitisho au nenosiri, hata na mtu anayesema anatoka Xaraash.', 'የማረጋገጫ ኮድ ወይም የይለፍ ቃል ለማንም አያጋሩ፣ ከXaraash ነኝ ለሚል ሰውም ቢሆን።', 'Ne partagez jamais un code de vérification ou un mot de passe, même avec quelqu’un qui dit venir de Xaraash.']] }
+      ]
+    },
     safety: {
       title: ['Xarunta Badbaadada', 'Safety Center', 'Kituo cha Usalama', 'የደህንነት ማዕከል', 'Centre de sécurité'],
       lead: ['Xaraash waxay rabtaa in dadku si ammaan ah u iibsadaan oo u iibiyaan. Halkan ka baro sida aad u ilaalin lahayd naftaada iyo lacagtaada.', 'Xaraash is built for people who want to buy and sell safely. Here is how to protect yourself and your money.', 'Xaraash imejengwa kwa watu wanaotaka kununua na kuuza kwa usalama. Hivi ndivyo unavyoweza kujilinda wewe na pesa zako.', 'Xaraash ሰዎች በደህንነት እንዲገዙና እንዲሸጡ የተሰራ ነው። እራስዎን እና ገንዘብዎን እንዴት እንደሚጠብቁ እነሆ።', 'Xaraash est conçu pour acheter et vendre en toute sécurité. Voici comment vous protéger, vous et votre argent.'],
@@ -858,9 +891,9 @@ button { cursor: pointer; }
       '<div class="crumbs">' + esc(x.home) + ' / ' + esc(t().cat[p.cat]) + (p.tag ? ' / ' + esc(BRANDNAME[p.tag] || t().tg[p.tag] || '') : '') + '</div>' +
       '<div class="dgrid"><article class="panel"><h1>' + esc(p.title[li] || p.title[0]) + '</h1>' +
       (p.photos && p.photos.length ? '<div class="gallery">' + p.photos.map(function (u) { return '<img src="' + u + '" alt="">'; }).join('') + '</div>' : '<div class="thumb big" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>') +
-      '<dl class="specs"><dt>' + esc(x.price) + '</dt><dd>' + esc(price) + '</dd><dt>' + esc(x.city) + '</dt><dd>' + esc(p.city) + '</dd><dt>' + esc(x.cat) + '</dt><dd>' + esc(t().cat[p.cat]) + '</dd><dt>' + esc(x.posted) + '</dt><dd>' + esc(ago(p.age)) + '</dd><dt>' + esc(x.seller) + '</dt><dd>' + esc(who) + '</dd></dl>' +
+      '<dl class="specs"><dt>' + esc(x.price) + '</dt><dd>' + esc(price) + '</dd><dt>' + esc(x.city) + '</dt><dd>' + esc(p.city) + '</dd><dt>' + esc(x.cat) + '</dt><dd>' + esc(t().cat[p.cat]) + '</dd><dt>' + esc(x.posted) + '</dt><dd>' + esc(ago(p.age)) + '</dd><dt>' + esc(x.seller) + '</dt><dd>' + esc(who) + '</dd>' + (p.phone ? '<dt>' + esc(t().phoneLbl) + '</dt><dd>' + esc(p.phone) + '</dd>' : '') + '</dl>' +
       '<p>' + esc(x.desc.replace('{u}', who)) + '</p><p class="eg">' + esc(x.descTag) + '</p>' +
-      '<div class="btnrow"><button class="post" type="button" data-soon>' + esc(x.contact) + '</button><button class="ghost" type="button" data-soon>' + esc(x.report) + '</button></div>' +
+      '<div class="btnrow">' + contactBtns(p, x) + '<button class="ghost" type="button" data-soon>' + esc(x.report) + '</button>' + ownerBtns(p) + '</div>' +
       '<div class="tip">' + esc(x.tip) + ' <button type="button" data-page="safety">' + esc(x.tipLink) + '</button></div></article>' +
       '<aside class="panel"><h2 style="margin-top:0">' + esc(x.similar) + '</h2><div class="sim">' + sim.map(function (q) {
         return '<button type="button" data-ad-go="' + q.id + '">' + thumbHtml(q) + '<span>' + esc(q.title[li] || q.title[0]) + '</span></button>';
@@ -873,6 +906,7 @@ button { cursor: pointer; }
     p.blocks.forEach(function (b) {
       h += '<section><h2>' + esc(b.h[li]) + '</h2>';
       if (b.chips) h += '<div class="pchips">' + b.chips.map(function (c) { return '<span style="--c:' + c[1] + '"><i></i>' + esc(c[0][li]) + '</span>'; }).join('') + '</div>';
+      if (b.contact) h += '<p><strong>Abdullahi M. Kulane</strong></p><p><a class="phone" href="tel:+252615128202">+252 615 128 202</a></p>';
       if (b.p) b.p.forEach(function (q) { h += '<p>' + esc(q[li]) + '</p>'; });
       if (b.ul) h += '<ul>' + b.ul.map(function (q) { return '<li>' + esc(q[li]) + '</li>'; }).join('') + '</ul>';
       if (b.ol) h += '<ol>' + b.ol.map(function (q) { return '<li>' + esc(q[li]) + '</li>'; }).join('') + '</ol>';
@@ -888,13 +922,76 @@ button { cursor: pointer; }
     var h = location.hash.slice(1); if (h !== view && (h === '' || h.indexOf('ad-') === 0 || PG[h])) { view = h; renderView(); }
   });
 
+  /* ---------- Contact, edit and delete ---------- */
+  var editing = null;
+  function cleanPhone(v) { var x = String(v || '').replace(/[^0-9+()\s-]/g, '').trim().slice(0, 20); return x.replace(/\D/g, '').length >= 6 ? x : ''; }
+  function getKeys() { try { return JSON.parse(localStorage.getItem('xaraash-keys') || '{}') || {}; } catch (e) { return {}; } }
+  function setKey(id, k) { try { var m = getKeys(); m[id] = k; localStorage.setItem('xaraash-keys', JSON.stringify(m)); } catch (e) {} }
+  function dropKey(id) { try { var m = getKeys(); delete m[id]; localStorage.setItem('xaraash-keys', JSON.stringify(m)); } catch (e) {} }
+  function savedContact() { try { return JSON.parse(localStorage.getItem('xaraash-contact') || '{}') || {}; } catch (e) { return {}; } }
+  function contactBtns(p, x) {
+    if (!p.phone) return '<button class="post" type="button" data-soon>' + esc(x.contact) + '</button>';
+    var tel = p.phone.replace(/[^\d+]/g, ''), wa = p.phone.replace(/\D/g, '');
+    return '<a class="post" href="tel:' + esc(tel) + '">' + esc(t().call) + '</a><a class="ghost" href="https://wa.me/' + esc(wa) + '" target="_blank" rel="noopener">' + esc(t().whatsapp) + '</a>';
+  }
+  function ownerBtns(p) {
+    if (!p.rid || !getKeys()[p.rid]) return '';
+    return '<button class="ghost" type="button" data-edit="' + esc(p.rid) + '">' + esc(t().edit) + '</button><button class="ghost danger" type="button" data-del="' + esc(p.rid) + '">' + esc(t().del) + '</button>';
+  }
+  function openForm(p) {
+    editing = p && p.rid ? p.rid : null;
+    $('postForm').reset(); photos = []; renderPhotos(); $('pf-pmsg').textContent = '';
+    var x = t();
+    $('pf-h').textContent = editing ? x.editPost : x.add;
+    $('pf-submit').textContent = editing ? x.save : x.publish;
+    $('pf-photos-field').hidden = !!editing;
+    if (editing) {
+      $('pf-title').value = p.title[0]; $('pf-cat').value = p.cat; $('pf-city').value = p.city;
+      $('pf-cur').value = 'USD'; $('pf-price').value = p.price == null ? '' : p.price;
+      $('pf-name').value = p.user || ''; $('pf-phone').value = p.phone || '';
+    } else {
+      var c = savedContact(); $('pf-name').value = c.name || ''; $('pf-phone').value = c.phone || '';
+      $('pf-cur').value = localCur($('pf-city').value);
+    }
+    updateConv();
+    $('veil').hidden = false; $('pf-title').focus();
+  }
+  function closeForm() { editing = null; $('veil').hidden = true; }
+  async function updateRemote(rid, f) {
+    var key = getKeys()[rid]; if (!key || !API()) { toast(t().saveFail); return; }
+    try {
+      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'update', id: rid, key: key, title: f.title, cat: f.cat, city: f.city, priceUsd: f.priceUsd, name: f.name, phone: f.phone }) });
+      var d = await r.json(); if (!d || !d.ok) throw new Error('x');
+      await loadRemote(); renderView(); toast(t().saved);
+    } catch (e) { toast(t().saveFail); }
+  }
+  async function deleteRemote(rid) {
+    var key = getKeys()[rid]; if (!key || !API()) { toast(t().saveFail); return; }
+    try {
+      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'delete', id: rid, key: key }) });
+      var d = await r.json(); if (!d || !d.ok) throw new Error('x');
+      dropKey(rid); S.remote = S.remote.filter(function (q) { return q.rid !== rid; });
+      nav(''); renderList(); toast(t().deleted);
+    } catch (e) { toast(t().saveFail); }
+  }
+  document.addEventListener('click', function (e) {
+    var ed = e.target.closest('[data-edit]');
+    if (ed) { var q = S.remote.filter(function (z) { return z.rid === ed.getAttribute('data-edit'); })[0]; if (q) openForm(q); return; }
+    var dl = e.target.closest('[data-del]');
+    if (dl) {
+      if (dl.getAttribute('data-arm')) deleteRemote(dl.getAttribute('data-del'));
+      else { dl.setAttribute('data-arm', '1'); dl.textContent = t().delSure; }
+    }
+  });
+
   /* ---------- Shared storage (Google Sheets + Drive through Apps Script) ---------- */
   function API() { return (window.XARAASH_API_URL || '').trim(); }
   async function shareRemote(post) {
     try {
-      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'add', title: post.title[0], cat: post.cat, city: post.city, priceUsd: post.price, photos: post.photos || [] }) });
+      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'add', title: post.title[0], cat: post.cat, city: post.city, priceUsd: post.price, name: post.user || '', phone: post.phone || '', photos: post.photos || [] }) });
       var d = await r.json();
       if (!d || !d.ok) throw new Error('rejected');
+      if (d.id && d.editKey) setKey(d.id, d.editKey);
       S.mine = S.mine.filter(function (m) { return m !== post; });
       await loadRemote(); toast(t().shared);
     } catch (e) { toast(t().shareFail); }
@@ -910,10 +1007,12 @@ button { cursor: pointer; }
         var title = String(p.title || '').slice(0, 80); if (!title) return null;
         var price = p.priceUsd === null || p.priceUsd === '' || p.priceUsd === undefined ? null : Number(p.priceUsd);
         return {
+          rid: String(p.id).replace(/[^\w-]/g, '').slice(0, 20),
           id: 'r' + String(p.id).replace(/[^\w-]/g, '').slice(0, 20),
+          phone: cleanPhone(p.phone),
           cat: CATS.indexOf(p.cat) > 0 ? p.cat : 'services',
           tag: '', city: String(p.city || '').slice(0, 40), price: isFinite(price) ? price : null,
-          user: String(p.user || 'Member').slice(0, 30), re: 0, mine: false,
+          user: String(p.user || 'Member').slice(0, 40), re: 0, mine: !!getKeys()[String(p.id).replace(/[^\w-]/g, '').slice(0, 20)],
           age: Math.max(0, Math.round((now - Number(p.ts)) / 60000)) || 0,
           title: [title, title, title, title, title],
           photos: (Array.isArray(p.photos) ? p.photos : []).filter(function (x) { return /^[\w-]{10,80}$/.test(String(x)); }).slice(0, 5).map(function (x) { return 'https://drive.google.com/thumbnail?id=' + x + '&sz=w1000'; })
@@ -1103,7 +1202,7 @@ button { cursor: pointer; }
     var b = e.target.closest('[data-tab]'); if (!b) return; var k = b.dataset.tab;
     if (k === 'home') { chatToggle(false); nav(''); }
     else if (k === 'search') { chatToggle(false); nav(''); window.scrollTo(0, 0); $('q').focus(); }
-    else if (k === 'add') { $('veil').hidden = false; $('pf-title').focus(); }
+    else if (k === 'add') { openForm(null); }
     else if (k === 'chat') { chatToggle($('chat').hidden); }
     else if (k === 'login') { toast(t().loginSoon); }
   });

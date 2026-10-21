@@ -1,17 +1,19 @@
 /**
  * Xaraash shared storage on Google Sheets + Drive (free).
- * Posts go to the "posts" sheet of the spreadsheet this script is attached to.
+ * Posts go to the "posts" sheet of the spreadsheet this script is attached to (it lives in your My Drive).
  * Photos go to the Drive folder "Xaraash photos" (shared as "anyone with the link can view").
+ * You can edit or delete any row directly in the Sheet. Set the "status" cell to hidden to hide a post.
  *
  * Setup: see README, section "Keydin Google Drive".
  */
 var SHEET_NAME = 'posts';
 var FOLDER_NAME = 'Xaraash photos';
-var HEADERS = ['id', 'createdAt', 'cat', 'city', 'priceUsd', 'title', 'user', 'photos', 'status'];
+var HEADERS = ['id', 'createdAt', 'cat', 'city', 'priceUsd', 'title', 'user', 'photos', 'status', 'phone', 'editKey'];
+var COL = { id: 0, createdAt: 1, cat: 2, city: 3, priceUsd: 4, title: 5, user: 6, photos: 7, status: 8, phone: 9, editKey: 10 };
 var CATS = ['cars', 'devices', 'real', 'furniture', 'services', 'fashion', 'animals', 'jobs', 'games', 'coaching', 'food', 'gardens', 'tourism', 'trips', 'events', 'arts', 'coding', 'lost', 'projects'];
 var MAX_PHOTOS = 5;
 var MAX_PHOTO_CHARS = 700000;   // ~500 KB per photo after base64
-var MAX_POSTS_PER_MINUTE = 20;  // whole site, protects your Drive quota
+var MAX_WRITES_PER_MINUTE = 30; // whole site, protects your Drive quota
 var LIST_LIMIT = 200;
 
 // Run this once from the editor (Run > setup) to approve access to Sheets and Drive.
@@ -20,7 +22,9 @@ function setup() { sheet_(); folder_(); }
 function sheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(SHEET_NAME);
-  if (!sh) { sh = ss.insertSheet(SHEET_NAME); sh.appendRow(HEADERS); sh.setFrozenRows(1); }
+  if (!sh) { sh = ss.insertSheet(SHEET_NAME); sh.setFrozenRows(1); }
+  var head = sh.getRange(1, 1, 1, HEADERS.length).getValues()[0];
+  if (head.join('|') !== HEADERS.join('|')) sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   return sh;
 }
 function folder_() {
@@ -29,8 +33,13 @@ function folder_() {
 }
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
-// Validates and trims an incoming post. Returns null when it should be rejected.
-function clean_(b) {
+function cleanPhone_(v) {
+  var s = String(v || '').replace(/[^0-9+()\s-]/g, '').trim().slice(0, 20);
+  return s.replace(/\D/g, '').length >= 6 ? s : '';
+}
+
+// Validates and trims an incoming post (add or update). Returns null when it should be rejected.
+function clean_(b, withPhotos) {
   if (!b || typeof b !== 'object') return null;
   var title = String(b.title || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 80);
   if (!title) return null;
@@ -38,11 +47,24 @@ function clean_(b) {
   var city = String(b.city || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 40);
   var price = b.priceUsd === null || b.priceUsd === '' || b.priceUsd === undefined ? '' : Number(b.priceUsd);
   if (price !== '' && (!isFinite(price) || price < 0 || price > 1e9)) return null;
-  var photos = Array.isArray(b.photos) ? b.photos.slice(0, MAX_PHOTOS) : [];
-  for (var i = 0; i < photos.length; i++) {
-    if (typeof photos[i] !== 'string' || photos[i].indexOf('data:image/jpeg;base64,') !== 0 || photos[i].length > MAX_PHOTO_CHARS) return null;
+  var name = String(b.name || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 40);
+  var phone = cleanPhone_(b.phone);
+  var photos = [];
+  if (withPhotos) {
+    photos = Array.isArray(b.photos) ? b.photos.slice(0, MAX_PHOTOS) : [];
+    for (var i = 0; i < photos.length; i++) {
+      if (typeof photos[i] !== 'string' || photos[i].indexOf('data:image/jpeg;base64,') !== 0 || photos[i].length > MAX_PHOTO_CHARS) return null;
+    }
   }
-  return { title: title, cat: cat, city: city, price: price, photos: photos };
+  return { title: title, cat: cat, city: city, price: price, name: name, phone: phone, photos: photos };
+}
+
+function findRow_(sh, id) {
+  var last = sh.getLastRow();
+  if (last < 2 || !id) return -1;
+  var ids = sh.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = ids.length - 1; i >= 0; i--) if (String(ids[i][0]) === String(id)) return i + 2;
+  return -1;
 }
 
 function doGet(e) {
@@ -55,12 +77,13 @@ function doGet(e) {
     var posts = [];
     for (var i = rows.length - 1; i >= 0; i--) {
       var r = rows[i];
-      if (r[8] === 'hidden') continue;
+      if (r[COL.status] === 'hidden' || r[COL.status] === 'deleted') continue;
       var ids = [];
-      try { ids = JSON.parse(r[7] || '[]'); } catch (x) { ids = []; }
-      posts.push({ id: String(r[0]), ts: new Date(r[1]).getTime(), cat: r[2], city: r[3], priceUsd: r[4] === '' ? null : Number(r[4]), title: r[5], user: r[6], photos: ids });
+      try { ids = JSON.parse(r[COL.photos] || '[]'); } catch (x) { ids = []; }
+      posts.push({ id: String(r[COL.id]), ts: new Date(r[COL.createdAt]).getTime(), cat: r[COL.cat], city: r[COL.city],
+        priceUsd: r[COL.priceUsd] === '' ? null : Number(r[COL.priceUsd]), title: r[COL.title], user: r[COL.user], phone: r[COL.phone] || '', photos: ids });
     }
-    return json_({ ok: true, posts: posts });
+    return json_({ ok: true, posts: posts });  // editKey is never sent
   } catch (err) {
     return json_({ ok: false, error: 'list_failed' });
   }
@@ -71,30 +94,51 @@ function doPost(e) {
   try {
     lock.waitLock(10000);
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    if (body.action !== 'add') return json_({ ok: false, error: 'bad_action' });
+    var action = body.action;
+    if (action !== 'add' && action !== 'update' && action !== 'delete') return json_({ ok: false, error: 'bad_action' });
 
     var cache = CacheService.getScriptCache();
     var key = 'rl' + Math.floor(Date.now() / 60000);
     var n = Number(cache.get(key) || 0);
-    if (n >= MAX_POSTS_PER_MINUTE) return json_({ ok: false, error: 'rate_limited' });
+    if (n >= MAX_WRITES_PER_MINUTE) return json_({ ok: false, error: 'rate_limited' });
     cache.put(key, String(n + 1), 120);
 
-    var p = clean_(body);
-    if (!p) return json_({ ok: false, error: 'invalid' });
+    var sh = sheet_();
 
-    var id = Utilities.getUuid().slice(0, 8);
-    var ids = [];
-    if (p.photos.length) {
-      var f = folder_();
-      for (var i = 0; i < p.photos.length; i++) {
-        var bytes = Utilities.base64Decode(p.photos[i].split(',')[1]);
-        var file = f.createFile(Utilities.newBlob(bytes, 'image/jpeg', id + '-' + i + '.jpg'));
-        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        ids.push(file.getId());
+    if (action === 'add') {
+      var p = clean_(body, true);
+      if (!p) return json_({ ok: false, error: 'invalid' });
+      var id = Utilities.getUuid().slice(0, 8), editKey = Utilities.getUuid(), ids = [];
+      if (p.photos.length) {
+        var f = folder_();
+        for (var i = 0; i < p.photos.length; i++) {
+          var bytes = Utilities.base64Decode(p.photos[i].split(',')[1]);
+          var file = f.createFile(Utilities.newBlob(bytes, 'image/jpeg', id + '-' + i + '.jpg'));
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          ids.push(file.getId());
+        }
       }
+      sh.appendRow([id, new Date(), p.cat, p.city, p.price, p.title, p.name || ('Member ' + id.slice(0, 4)), JSON.stringify(ids), 'visible', p.phone, editKey]);
+      return json_({ ok: true, id: id, editKey: editKey });
     }
-    sheet_().appendRow([id, new Date(), p.cat, p.city, p.price, p.title, 'Member ' + id.slice(0, 4), JSON.stringify(ids), 'visible']);
-    return json_({ ok: true, id: id });
+
+    // update / delete need the secret key that was returned when the post was created
+    var row = findRow_(sh, body.id);
+    if (row < 0) return json_({ ok: false, error: 'not_found' });
+    var stored = String(sh.getRange(row, COL.editKey + 1).getValue() || '');
+    if (!stored || stored !== String(body.key || '')) return json_({ ok: false, error: 'forbidden' });
+
+    if (action === 'delete') {
+      sh.getRange(row, COL.status + 1).setValue('deleted');
+      return json_({ ok: true });
+    }
+    var u = clean_(body, false);
+    if (!u) return json_({ ok: false, error: 'invalid' });
+    var name = u.name || String(sh.getRange(row, COL.user + 1).getValue() || '');
+    sh.getRange(row, COL.cat + 1, 1, 4).setValues([[u.cat, u.city, u.price, u.title]]);
+    sh.getRange(row, COL.user + 1).setValue(name);
+    sh.getRange(row, COL.phone + 1).setValue(u.phone);
+    return json_({ ok: true });
   } catch (err) {
     return json_({ ok: false, error: 'server_error' });
   } finally {
