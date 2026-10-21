@@ -224,6 +224,20 @@ button { cursor: pointer; }
   .find .post { display: none; }
 }
 
+/* Photos */
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.photobtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.pbtn { cursor: pointer; padding: 10px 14px; border-radius: 12px; display: inline-flex; align-items: center; }
+.pbtn:focus-within { outline: 3px solid var(--cta); outline-offset: 2px; }
+.pthumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+.pthumbs:empty { display: none; }
+.pt { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+.pt img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pt button { position: absolute; top: 4px; inset-inline-end: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(8,16,30,.72); color: #fff; font-size: 1rem; line-height: 1; display: grid; place-items: center; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+.thumb.photo { overflow: hidden; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-block: 16px; }
+.gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; display: block; background: var(--surface-2); }
 /* Detail + info pages */
 .tlink { background: none; border: 0; padding: 0; text-align: start; color: inherit; font: inherit; cursor: pointer; }
 .tlink:hover { text-decoration: underline; }
@@ -345,6 +359,7 @@ button { cursor: pointer; }
     <label class="field"><span data-i="fTitle"></span><input id="pf-title" required maxlength="80"></label>
     <label class="field"><span data-i="fCat"></span><select id="pf-cat"></select></label>
     <label class="field"><span data-i="fCity"></span><select id="pf-city"></select></label>
+    <div class="field"><span data-i="fPhotos"></span><div class="photobtns"><label class="ghost pbtn"><input id="pf-cam" class="vh" type="file" accept="image/*" capture="environment"><span data-i="takePhoto"></span></label><label class="ghost pbtn"><input id="pf-gal" class="vh" type="file" accept="image/*" multiple><span data-i="pickPhoto"></span></label></div><div class="pthumbs" id="pf-thumbs"></div><small class="conv" id="pf-pmsg" aria-live="polite"></small></div>
     <div class="field"><span data-i="fPrice"></span><div class="pricerow"><input id="pf-price" type="number" min="0" step="any" inputmode="decimal" aria-label="Price"><select id="pf-cur" aria-label="Currency"></select></div><small class="conv" id="pf-conv"></small></div>
     <div class="acts"><button type="button" class="ghost" id="pf-cancel" data-i="cancel"></button><button type="submit" class="post" data-i="publish"></button></div>
   </form>
@@ -509,6 +524,15 @@ button { cursor: pointer; }
   };
   Object.keys(NEWI).forEach(function (k) { Object.assign(T[k], NEWI[k]); });
 
+  var NEWP = {
+    so: { fPhotos: 'Sawirrada (ilaa 5)', takePhoto: 'Sawir qaado', pickPhoto: 'Dooro sawiro', photoMax: 'Ugu badnaan 5 sawir.', photoErr: 'Sawirka lama akhrin karo. Isku day mid kale.', photoRm: 'Ka saar' },
+    en: { fPhotos: 'Photos (up to 5)', takePhoto: 'Take photo', pickPhoto: 'Choose photos', photoMax: 'Up to 5 photos.', photoErr: 'That photo could not be read. Try another.', photoRm: 'Remove' },
+    sw: { fPhotos: 'Picha (hadi 5)', takePhoto: 'Piga picha', pickPhoto: 'Chagua picha', photoMax: 'Hadi picha 5.', photoErr: 'Picha haikuweza kusomwa. Jaribu nyingine.', photoRm: 'Ondoa' },
+    am: { fPhotos: 'ፎቶዎች (እስከ 5)', takePhoto: 'ፎቶ አንሳ', pickPhoto: 'ፎቶ ምረጥ', photoMax: 'እስከ 5 ፎቶ።', photoErr: 'ፎቶው ሊነበብ አልቻለም። ሌላ ይሞክሩ።', photoRm: 'አስወግድ' },
+    fr: { fPhotos: 'Photos (jusqu’à 5)', takePhoto: 'Prendre une photo', pickPhoto: 'Choisir des photos', photoMax: '5 photos maximum.', photoErr: 'Cette photo est illisible. Essayez-en une autre.', photoRm: 'Retirer' }
+  };
+  Object.keys(NEWP).forEach(function (k) { Object.assign(T[k], NEWP[k]); });
+
   var SIDE = [
     { key: 'gBrands', cat: 'cars', tags: ['toyota','nissan','ford','lexus','chevrolet','mercedes','gmc','bmw','dodge'], brand: true },
     { key: 'gTypes', cat: 'cars', tags: ['parts','trucks','moto','classic','crashed','lease'] },
@@ -547,6 +571,10 @@ button { cursor: pointer; }
   var S = { lang: 'so', cur: 'auto', cat: 'all', tag: '', q: '', region: '', sort: 'new', shown: 8, mine: [] };
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  function thumbHtml(p) {
+    if (p.photos && p.photos.length) return '<div class="thumb photo"><img src="' + p.photos[0] + '" alt="" loading="lazy"></div>';
+    return '<div class="thumb" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>';
+  }
   function svg(name) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[name] + '</svg>'; }
   function t() { return T[S.lang]; }
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
@@ -617,7 +645,7 @@ button { cursor: pointer; }
         '<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>' + esc(p.city) + '</span>' +
         '<span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>' + esc(ago(p.age)) + '</span>' +
         '<span><i class="av">' + esc(who.charAt(0).toUpperCase()) + '</i>' + esc(who) + '</span>' + rep + price +
-        '</div></div><div class="thumb" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div></li>';
+        '</div></div>' + thumbHtml(p) + '</li>';
     }).join('');
     $('moreBtn').hidden = res.length <= S.shown;
   }
@@ -680,8 +708,8 @@ button { cursor: pointer; }
     e.preventDefault();
     var title = $('pf-title').value.trim(); if (!title) return;
     var pr = $('pf-price').value, pcode = $('pf-cur').value, usd = pr === '' ? null : Math.round(Number(pr) / CUR[pcode].r * 100) / 100;
-    S.mine.unshift({ id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true });
-    $('postForm').reset(); $('veil').hidden = true; S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
+    S.mine.unshift({ id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: '', re: 0, age: 0, title: [title, title, title], mine: true, photos: photos.slice() });
+    $('postForm').reset(); photos = []; renderPhotos(); $('veil').hidden = true; S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
     $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false');
     renderRail(); renderSide(); renderRegion(); renderList(); toast(t().added);
   });
@@ -819,13 +847,13 @@ button { cursor: pointer; }
     $('viewDetail').innerHTML = backBtn() +
       '<div class="crumbs">' + esc(x.home) + ' / ' + esc(t().cat[p.cat]) + (p.tag ? ' / ' + esc(BRANDNAME[p.tag] || t().tg[p.tag] || '') : '') + '</div>' +
       '<div class="dgrid"><article class="panel"><h1>' + esc(p.title[li] || p.title[0]) + '</h1>' +
-      '<div class="thumb big" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>' +
+      (p.photos && p.photos.length ? '<div class="gallery">' + p.photos.map(function (u) { return '<img src="' + u + '" alt="">'; }).join('') + '</div>' : '<div class="thumb big" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>') +
       '<dl class="specs"><dt>' + esc(x.price) + '</dt><dd>' + esc(price) + '</dd><dt>' + esc(x.city) + '</dt><dd>' + esc(p.city) + '</dd><dt>' + esc(x.cat) + '</dt><dd>' + esc(t().cat[p.cat]) + '</dd><dt>' + esc(x.posted) + '</dt><dd>' + esc(ago(p.age)) + '</dd><dt>' + esc(x.seller) + '</dt><dd>' + esc(who) + '</dd></dl>' +
       '<p>' + esc(x.desc.replace('{u}', who)) + '</p><p class="eg">' + esc(x.descTag) + '</p>' +
       '<div class="btnrow"><button class="post" type="button" data-soon>' + esc(x.contact) + '</button><button class="ghost" type="button" data-soon>' + esc(x.report) + '</button></div>' +
       '<div class="tip">' + esc(x.tip) + ' <button type="button" data-page="safety">' + esc(x.tipLink) + '</button></div></article>' +
       '<aside class="panel"><h2 style="margin-top:0">' + esc(x.similar) + '</h2><div class="sim">' + sim.map(function (q) {
-        return '<button type="button" data-ad-go="' + q.id + '"><div class="thumb" style="--h:' + HUE[q.cat] + '">' + svg(q.cat) + '</div><span>' + esc(q.title[li] || q.title[0]) + '</span></button>';
+        return '<button type="button" data-ad-go="' + q.id + '">' + thumbHtml(q) + '<span>' + esc(q.title[li] || q.title[0]) + '</span></button>';
       }).join('') + '</div></aside></div>';
   }
   function renderPage(key) {
@@ -848,6 +876,43 @@ button { cursor: pointer; }
   });
   window.addEventListener('hashchange', function () {
     var h = location.hash.slice(1); if (h !== view && (h === '' || h.indexOf('ad-') === 0 || PG[h])) { view = h; renderView(); }
+  });
+
+  /* ---------- Photos: camera or gallery, resized in the browser ---------- */
+  var photos = [], MAXP = 5;
+  function renderPhotos() {
+    $('pf-thumbs').innerHTML = photos.map(function (u, i) {
+      return '<div class="pt"><img src="' + u + '" alt=""><button type="button" data-rm="' + i + '" aria-label="' + esc(t().photoRm) + '">×</button></div>';
+    }).join('');
+  }
+  function shrink(file) {
+    return new Promise(function (ok, fail) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var m = 1000, k = Math.min(1, m / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); fail(new Error('read')); };
+      img.src = url;
+    });
+  }
+  async function addFiles(list) {
+    var msg = $('pf-pmsg'); msg.textContent = '';
+    var files = Array.prototype.slice.call(list || []).filter(function (f) { return /^image\//.test(f.type) || !f.type; });
+    for (var i = 0; i < files.length; i++) {
+      if (photos.length >= MAXP) { msg.textContent = t().photoMax; break; }
+      try { photos.push(await shrink(files[i])); } catch (e) { msg.textContent = t().photoErr; }
+    }
+    renderPhotos();
+  }
+  ['pf-cam', 'pf-gal'].forEach(function (id) {
+    $(id).addEventListener('change', function (e) { addFiles(e.target.files).then(function () { e.target.value = ''; }); });
+  });
+  $('pf-thumbs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-rm]'); if (!b) return;
+    photos.splice(Number(b.getAttribute('data-rm')), 1); $('pf-pmsg').textContent = ''; renderPhotos();
   });
 
   /* ---------- Currency, language droplist, app tabs, chat ---------- */
