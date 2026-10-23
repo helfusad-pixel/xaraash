@@ -95,13 +95,32 @@ function doPost(e) {
     lock.waitLock(10000);
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     var action = body.action;
-    if (action !== 'add' && action !== 'update' && action !== 'delete') return json_({ ok: false, error: 'bad_action' });
+    if (['add', 'update', 'delete', 'report', 'rate'].indexOf(action) < 0) return json_({ ok: false, error: 'bad_action' });
 
     var cache = CacheService.getScriptCache();
     var key = 'rl' + Math.floor(Date.now() / 60000);
     var n = Number(cache.get(key) || 0);
     if (n >= MAX_WRITES_PER_MINUTE) return json_({ ok: false, error: 'rate_limited' });
     cache.put(key, String(n + 1), 120);
+
+    if (action === 'report' || action === 'rate') {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var txt = function (v, m) { return String(v == null ? '' : v).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, m); };
+      if (action === 'report') {
+        var reasons = ['r1', 'r2', 'r3', 'r4', 'r5'];
+        var reason = reasons.indexOf(body.reason) >= 0 ? body.reason : 'r5';
+        var rs = ss.getSheetByName('reports') || ss.insertSheet('reports');
+        if (rs.getLastRow() === 0) rs.appendRow(['createdAt', 'postId', 'reason', 'note']);
+        rs.appendRow([new Date().toISOString(), "'" + txt(body.postId, 40), reason, "'" + txt(body.note, 300)]);
+        return json_({ ok: true });
+      }
+      var stars = Math.round(Number(body.stars));
+      if (!(stars >= 1 && stars <= 5)) return json_({ ok: false, error: 'invalid' });
+      var ra = ss.getSheetByName('ratings') || ss.insertSheet('ratings');
+      if (ra.getLastRow() === 0) ra.appendRow(['createdAt', 'stars', 'comment']);
+      ra.appendRow([new Date().toISOString(), stars, "'" + txt(body.comment, 300)]);
+      return json_({ ok: true });
+    }
 
     var sh = sheet_();
 

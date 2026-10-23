@@ -109,3 +109,8 @@ npx cap open ios
 2. Push to GitHub, enable Pages (Source: GitHub Actions).
 3. Deploy the repo to Vercel, set `ANTHROPIC_API_KEY`, paste the function URL into `www/config.js`, push.
 4. Install as a PWA, or build the Android APK with Capacitor / the Android workflow.
+
+
+## Update (2026-10-23)
+So: Dhammaan badhamada hadda way shaqeeyaan (profile, soo sheeg, qiimeyn, rakib app, bogagga macluumaadka). Ku soo celi Code.gs Apps Script oo dooro Deploy > Manage deployments > New version.
+En: All buttons now work (profile, report, rating, install, info pages). Paste the new Code.gs into Apps Script and deploy a New version so report/rating are saved to your Sheet (tabs "reports" and "ratings").

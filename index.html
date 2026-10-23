@@ -180,6 +180,16 @@ button { cursor: pointer; }
 .sheet h2 { margin: 0 0 14px; font-family: var(--font-display); font-size: 1.4rem; }
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-weight: 600; font-size: .9rem; }
 .field input, .field select { border: 1px solid var(--line); background: var(--surface-2); border-radius: 10px; padding: 11px 12px; font-weight: 500; }
+.field textarea { border: 1px solid var(--line); background: var(--surface-2); border-radius: 10px; padding: 11px 12px; font-weight: 500; font-family: inherit; min-height: 84px; resize: vertical; }
+.doc h3 { margin: 0 0 8px; }
+.qa { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; background: var(--surface-2); }
+.qa summary { font-weight: 700; cursor: pointer; }
+.qa p { margin: 8px 0 0; }
+.stars { display: flex; gap: 6px; margin: 8px 0 12px; }
+.stars button { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; font-size: 1.5rem; line-height: 1; padding: 8px 10px; color: var(--muted, #8a94a6); }
+.stars button[aria-pressed="true"] { color: #f5a623; border-color: #f5a623; }
+.radios { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.radios label { display: flex; gap: 8px; align-items: center; font-weight: 600; }
 .acts { display: flex; gap: 10px; justify-content: flex-end; padding-top: 6px; }
 .acts .post { padding: 12px 22px; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 50; background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-weight: 600; max-width: calc(100% - 32px); box-shadow: var(--shadow); }
@@ -346,9 +356,9 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
 <footer class="foot">
   <div class="wrap">
     <div class="apps">
-      <button class="appbtn" type="button" data-soon><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl1"></small><b>App Store</b></span></button>
-      <button class="appbtn" type="button" data-soon><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl2"></small><b>Google Play</b></span></button>
-      <button class="appbtn" type="button" data-soon><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl3"></small><b>AppGallery</b></span></button>
+      <button class="appbtn" type="button" data-page="install"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl1"></small><b>App Store</b></span></button>
+      <button class="appbtn" type="button" data-page="install"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl2"></small><b>Google Play</b></span></button>
+      <button class="appbtn" type="button" data-page="install"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span><small data-i="dl3"></small><b>AppGallery</b></span></button>
     </div>
     <p class="langline" data-i="applangs"></p>
     <div class="strip"><b data-i="stripA"></b><span data-i="stripB"></span></div>
@@ -388,6 +398,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   <button type="button" data-tab="chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg><span data-i="navChat"></span></button>
   <button type="button" data-tab="login"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span data-i="login"></span></button>
 </nav>
+<div class="veil" id="veil2" hidden><div class="sheet" id="sheet2" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast" hidden></div>
 
 <script src="config.js"></script>
@@ -696,13 +707,13 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     document.documentElement.lang = S.lang === 'sw' ? 'sw' : S.lang;
     document.querySelectorAll('[data-i]').forEach(function (el) { el.textContent = x[el.getAttribute('data-i')]; });
     document.querySelectorAll('[data-ip]').forEach(function (el) { el.placeholder = x[el.getAttribute('data-ip')]; });
-    var PAGEMAP = { 3: 'discount', 5: 'contact', 8: 'safety', 12: 'escrow', 15: 'ip' };
-    $('links').innerHTML = x.links.map(function (l, i) { return '<button class="linkbtn" type="button" ' + (PAGEMAP[i] ? 'data-page="' + PAGEMAP[i] + '"' : 'data-soon') + '>' + svg('l' + i) + '<span>' + esc(l) + '</span></button>'; }).join('');
+    var PAGEMAP = { 0: 'act:profile', 1: 'increase', 2: 'license', 3: 'discount', 4: 'faq', 5: 'contact', 6: 'commission', 7: 'terms', 8: 'safety', 9: 'suspended', 10: 'privacy', 11: 'membership', 12: 'escrow', 13: 'rating', 14: 'prohibited', 15: 'ip' };
+    $('links').innerHTML = x.links.map(function (l, i) { return '<button class="linkbtn" type="button" ' + (PAGEMAP[i].indexOf('act:') === 0 ? 'data-action="' + PAGEMAP[i].slice(4) + '"' : 'data-page="' + PAGEMAP[i] + '"') + '>' + svg('l' + i) + '<span>' + esc(l) + '</span></button>'; }).join('');
     document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang); });
     renderRail(); renderSide(); renderRegion(); renderList(); renderView();
     $('langSel').value = S.lang;
     $('ratesLine').textContent = x.ratesLbl + ' (' + RATES_DATE + '): 1 USD = ' + ['ETB','KES','TZS','UGX','RWF','DJF'].map(function (c) { return CUR[c].r.toLocaleString('en-US') + ' ' + c; }).join(' · ');
-    renderQuick(); refreshHello();
+    renderQuick(); refreshHello(); refreshLogin();
   }
 
   var tt;
@@ -717,9 +728,9 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     if (b.dataset.lang) { S.lang = b.dataset.lang; ls('xaraash-lang', S.lang); renderText(); return; }
     if (b.dataset.cat) { S.cat = b.dataset.cat; S.tag = ''; S.shown = 8; renderRail(); renderSide(); renderList(); return; }
     if (b.dataset.tag) { S.tag = S.tag === b.dataset.tag ? '' : b.dataset.tag; S.shown = 8; renderSide(); renderList(); return; }
-    if (b.hasAttribute('data-soon')) { toast(t().soon); return; }
+    if (b.dataset.action) { doAction(b.dataset.action, b); return; }
   });
-  $('loginBtn').onclick = function () { toast(t().loginSoon); };
+  $('loginBtn').onclick = function () { doAction('profile'); };
   $('q').oninput = function (e) { S.q = e.target.value; S.shown = 8; renderList(); };
   $('region').onchange = function (e) { S.region = e.target.value; S.shown = 8; renderList(); };
   $('sortNew').onclick = function () { S.sort = 'new'; $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false'); renderList(); };
@@ -729,7 +740,8 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   $('addBtn').onclick = function () { openForm(null); };
   $('pf-cancel').onclick = function () { $('veil').hidden = true; };
   $('veil').addEventListener('click', function (e) { if (e.target === $('veil')) $('veil').hidden = true; });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $('veil').hidden = true; });
+  $('veil2').addEventListener('click', function (e) { if (e.target === $('veil2')) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { $('veil').hidden = true; closeModal(); } });
   $('postForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var title = $('pf-title').value.trim(); if (!title) return;
@@ -787,6 +799,122 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   }
   // Pages: title [so,en,sw], lead, blocks {h, p[], ul[], ol[], chips[], login}
   var PG = {
+    increase: {
+      title: ['Kordhi aragtida xayeysiiska', 'Increase ad views', 'Ongeza watazamaji wa tangazo', 'የማስታወቂያ እይታ ጨምር', 'Augmenter les vues de l’annonce'],
+      lead: ['Xayeysiisyada fiican ayaa dad badan jiidata. Halkan waa waxyaabaha caawiya.', 'Good posts get more attention. These tips help.', 'Matangazo mazuri huvutia watu wengi. Vidokezo hivi vinasaidia.', 'ጥሩ ማስታወቂያዎች ብዙ ትኩረት ያገኛሉ። እነዚህ ምክሮች ይረዳሉ።', 'Les bonnes annonces attirent plus de monde. Ces conseils aident.'],
+      blocks: [
+        { h: ['Talooyin', 'Tips', 'Vidokezo', 'ምክሮች', 'Conseils'], ul: [
+          ['Ku dar 3 ilaa 5 sawir oo caddaan ah, iftiin ku qaado.', 'Add 3 to 5 clear photos taken in good light.', 'Weka picha 3 hadi 5 zilizo wazi, zilizopigwa kwenye mwanga mzuri.', 'በጥሩ ብርሃን የተነሱ 3 እስከ 5 ግልጽ ፎቶዎችን ጨምሩ።', 'Ajoutez 3 à 5 photos nettes prises en bonne lumière.'],
+          ['Cinwaanka ku qor calaamadda, nooca iyo sannadka (tusaale: Toyota RAV4 2019).', 'Write the brand, model and year in the title (for example Toyota RAV4 2019).', 'Andika chapa, aina na mwaka kwenye kichwa (mfano Toyota RAV4 2019).', 'በርዕሱ ውስጥ ብራንድ፣ ሞዴልና ዓመት ጻፉ (ለምሳሌ Toyota RAV4 2019)።', 'Indiquez la marque, le modèle et l’année dans le titre (par exemple Toyota RAV4 2019).'],
+          ['Geli qiimo sax ah iyo lambar taleefan oo shaqeeya.', 'Enter a fair price and a phone number that works.', 'Weka bei ya haki na namba ya simu inayofanya kazi.', 'ተመጣጣኝ ዋጋና የሚሰራ ስልክ ቁጥር ያስገቡ።', 'Indiquez un prix juste et un numéro de téléphone joignable.'],
+          ['Ka jawaab dhaqso marka dadku ku weydiiyaan.', 'Reply quickly when people ask.', 'Jibu haraka watu wanapouliza.', 'ሰዎች ሲጠይቁ በፍጥነት ይመልሱ።', 'Répondez vite quand on vous écrit.'],
+          ['Beddel ama tirtir xayeysiiska marka alaabta la iibiyo.', 'Update or delete the post once the item is sold.', 'Sasisha au futa tangazo bidhaa ikiuzwa.', 'እቃው ሲሸጥ ማስታወቂያውን አዘምኑ ወይም ሰርዙ።', 'Mettez à jour ou supprimez l’annonce une fois l’article vendu.']
+        ] },
+        { h: ['Xayeysiis lacag bixin ah', 'Paid promotion', 'Matangazo ya kulipia', 'የሚከፈልበት ማስተዋወቅ', 'Promotion payante'], p: [['Weli ma jiro. Marka la bilaabo, halkan ayaa lagu sheegi doonaa.', 'Not available yet. If it starts, it will be announced here.', 'Bado haipatikani. Ikianza, itatangazwa hapa.', 'እስካሁን የለም። ከተጀመረ እዚህ ይገለጻል።', 'Pas encore disponible. S’il démarre, il sera annoncé ici.']] }
+      ]
+    },
+    license: {
+      title: ['Shatiga', 'License', 'Leseni', 'ፈቃድ', 'Licence'],
+      lead: ['Iibiyeyaasha ganacsiga (gawaarida, guryaha) waxay ku muujin karaan shatigooda.', 'Business sellers (vehicles, property) can show their license.', 'Wauzaji wa biashara (magari, mali) wanaweza kuonyesha leseni yao.', 'የንግድ ሻጮች (ተሽከርካሪ፣ ንብረት) ፈቃዳቸውን ማሳየት ይችላሉ።', 'Les vendeurs professionnels (véhicules, immobilier) peuvent afficher leur licence.'],
+      blocks: [
+        { h: ['Xusuusin', 'Notes', 'Maelezo', 'ማስታወሻ', 'Remarques'], ul: [
+          ['Shatiga ganacsigaaga waa in uu ansax yahay dalka aad ka ganacsato.', 'Your business license must be valid in the country where you trade.', 'Leseni ya biashara yako lazima iwe halali katika nchi unayofanyia biashara.', 'የንግድ ፈቃድዎ በሚነግዱበት አገር የሚሰራ መሆን አለበት።', 'Votre licence commerciale doit être valide dans le pays où vous exercez.'],
+          ['Xaraash weli ma xaqiijiso shatiyada; tan waa qorshe.', 'Xaraash does not verify licenses yet; this is planned.', 'Xaraash bado haithibitishi leseni; hii imepangwa.', 'Xaraash እስካሁን ፈቃዶችን አያረጋግጥም፤ ይህ የታቀደ ነው።', 'Xaraash ne vérifie pas encore les licences ; c’est prévu.'],
+          ['Si aad u weydiiso xaqiijin, la xiriir kooxda Xaraash.', 'To ask about verification, contact the Xaraash team.', 'Ili kuuliza kuhusu uthibitisho, wasiliana na timu ya Xaraash.', 'ስለ ማረጋገጫ ለመጠየቅ የXaraash ቡድንን ያግኙ።', 'Pour la vérification, contactez l’équipe Xaraash.']
+        ] }
+      ]
+    },
+    faq: {
+      title: ['Su’aalaha', 'FAQ', 'Maswali ya mara kwa mara', 'ተደጋጋሚ ጥያቄዎች', 'FAQ'],
+      lead: ['Jawaabaha su’aalaha ugu badan.', 'Answers to the most common questions.', 'Majibu ya maswali yanayoulizwa mara nyingi.', 'ለተደጋጋሚ ጥያቄዎች መልሶች።', 'Réponses aux questions les plus fréquentes.'],
+      blocks: [{ h: ['Su’aalo iyo jawaabo', 'Questions and answers', 'Maswali na majibu', 'ጥያቄና መልስ', 'Questions et réponses'], qa: [
+        [['Sidee xayeysiis u soo dirtaa?', 'How do I post an ad?', 'Ninawekaje tangazo?', 'ማስታወቂያ እንዴት እለጥፋለሁ?', 'Comment publier une annonce ?'], ['Taabo “Soo dir xayeysiis”, buuxi foomka, kadibna “Daabac”. Waxaad ku dari kartaa ilaa 5 sawir.', 'Tap Add Post, fill in the form, then Publish. You can add up to 5 photos.', 'Bonyeza “Weka tangazo”, jaza fomu, kisha “Chapisha”. Unaweza kuongeza hadi picha 5.', '“ማስታወቂያ ለጥፍ” ይጫኑ፣ ቅጹን ይሙሉ፣ ከዚያ “ለጥፍ”። እስከ 5 ፎቶ ማከል ይችላሉ።', 'Touchez « Publier une annonce », remplissez le formulaire, puis « Publier ». Jusqu’à 5 photos.']],
+        [['Sidee ayaan xayeysiiskayga u beddelaa ama u tirtiraa?', 'How do I edit or delete my post?', 'Ninawezaje kuhariri au kufuta tangazo langu?', 'ማስታወቂያዬን እንዴት አስተካክላለሁ ወይም እሰርዛለሁ?', 'Comment modifier ou supprimer mon annonce ?'], ['Fur xayeysiiskaaga oo dhagsii Edit ama Delete. Waxay shaqeeyaan aaladda aad ka soo dirtay.', 'Open your post and tap Edit or Delete. This works on the device you posted from.', 'Fungua tangazo lako na ubonyeze Hariri au Futa. Hufanya kazi kwenye kifaa ulichotumia kuweka.', 'ማስታወቂያዎን ከፍተው አርም ወይም ሰርዝ ይጫኑ። ከለጠፉበት መሣሪያ ላይ ይሰራል።', 'Ouvrez votre annonce et touchez Modifier ou Supprimer. Cela fonctionne sur l’appareil utilisé pour publier.']],
+        [['Sidee lacagta loo beddelaa?', 'How are prices converted?', 'Bei zinabadilishwaje?', 'ዋጋዎች እንዴት ይቀየራሉ?', 'Comment les prix sont-ils convertis ?'], ['Soomaaliya waa dollar keliya. Dalalka kale waxay muujiyaan lacagtooda iyo dollar-ka. Sarifku waa sawir-qaad.', 'Somalia is US dollars only. Other countries show local currency and dollars. Rates are a snapshot.', 'Somalia ni dola pekee. Nchi nyingine zinaonyesha sarafu ya nchi na dola. Viwango ni picha ya wakati.', 'ሶማሊያ በዶላር ብቻ ናት። ሌሎች አገሮች የአገር ገንዘብና ዶላር ያሳያሉ። ተመኖቹ ቅጽበታዊ ናቸው።', 'La Somalie est en dollars US uniquement. Les autres pays affichent la devise locale et le dollar. Les taux sont un instantané.']],
+        [['Sidee ammaan ah u iibsadaa?', 'How do I buy safely?', 'Ninawezaje kununua kwa usalama?', 'በደህንነት እንዴት እገዛለሁ?', 'Comment acheter en sécurité ?'], ['Ku kulan goob dadweyne, ha bixin lacag ka hor intaadan arkin. Eeg Xarunta Badbaadada.', 'Meet in a public place and do not pay before you see the item. See the Safety Center.', 'Kutana mahali pa watu wengi na usilipe kabla ya kuona bidhaa. Tazama Kituo cha Usalama.', 'በሕዝብ ቦታ ይገናኙ፣ እቃውን ሳያዩ አይክፈሉ። የደህንነት ማዕከልን ይመልከቱ።', 'Rencontrez-vous en public et ne payez pas avant d’avoir vu l’article. Voir le Centre de sécurité.']],
+        [['Sidee app ahaan u rakibaa?', 'How do I install it as an app?', 'Ninaisakinishaje kama programu?', 'እንደ መተግበሪያ እንዴት እጭነዋለሁ?', 'Comment l’installer comme application ?'], ['Fur boggan taleefankaaga oo dooro “Add to Home Screen”. Eeg bogga Rakib app-ka.', 'Open this page on your phone and choose Add to Home Screen. See the Install the app page.', 'Fungua ukurasa huu kwenye simu na uchague Add to Home Screen. Tazama ukurasa wa Sakinisha programu.', 'ይህን ገጽ በስልክዎ ከፍተው Add to Home Screen ይምረጡ። የመተግበሪያ መጫኛ ገጹን ይመልከቱ።', 'Ouvrez cette page sur votre téléphone et choisissez Ajouter à l’écran d’accueil. Voir la page Installer l’application.']]
+      ] }]
+    },
+    commission: {
+      title: ['Komishanka bogga', 'Website commission', 'Kamisheni ya tovuti', 'የድረገጽ ኮሚሽን', 'Commission du site'],
+      lead: ['Xaraash hadda waa bilaash. Komishan weli lama dejin.', 'Xaraash is free to use right now. No commission has been set yet.', 'Xaraash ni bure kutumia sasa. Hakuna kamisheni iliyowekwa bado.', 'Xaraash አሁን በነጻ ይሰራል። እስካሁን ኮሚሽን አልተወሰነም።', 'Xaraash est gratuit pour le moment. Aucune commission n’est encore fixée.'],
+      blocks: [{ h: ['Waxa la ogaado', 'What to know', 'Cha kujua', 'ማወቅ ያለብዎ', 'À savoir'], ul: [
+        ['Haddii komishan la dejiyo, waxaa lagu sheegi doonaa boggan ka hor inta aan la dabaqin.', 'If a commission is introduced, it will be announced on this page first.', 'Kamisheni ikianzishwa, itatangazwa kwenye ukurasa huu kwanza.', 'ኮሚሽን ከተጀመረ መጀመሪያ በዚህ ገጽ ይገለጻል።', 'Si une commission est introduite, elle sera annoncée d’abord sur cette page.'],
+        ['Bogga Dhimista wuxuu ku tusaaleynayaa sida komishan gawaarida loo dhimi karo.', 'The Discount page gives an example of how a vehicle commission could be lowered.', 'Ukurasa wa Punguzo unatoa mfano wa jinsi kamisheni ya magari inavyoweza kupunguzwa.', 'የቅናሽ ገጹ የተሽከርካሪ ኮሚሽን እንዴት ሊቀንስ እንደሚችል ምሳሌ ይሰጣል።', 'La page Remise donne un exemple de réduction d’une commission sur les véhicules.']
+      ] }]
+    },
+    terms: {
+      title: ['Shuruudaha & xaaladaha', 'Terms & conditions', 'Masharti na vigezo', 'ውሎችና ሁኔታዎች', 'Conditions générales'],
+      lead: ['Qabyo guud. Ma aha talo sharci; milkiilaha bogga ayaa go’aamin doona kuwa rasmiga ah.', 'A general draft. It is not legal advice; the site owner will set the official terms.', 'Rasimu ya jumla. Si ushauri wa kisheria; mmiliki wa tovuti ataweka masharti rasmi.', 'አጠቃላይ ረቂቅ። የሕግ ምክር አይደለም፤ ኦፊሴላዊ ውሎችን የድረገጹ ባለቤት ይወስናል።', 'Un brouillon général. Ce n’est pas un avis juridique ; le propriétaire du site fixera les conditions officielles.'],
+      blocks: [{ h: ['Xeerarka asaasiga ah', 'Basic rules', 'Sheria za msingi', 'መሰረታዊ ደንቦች', 'Règles de base'], ul: [
+        ['Waxaad leedahay masuuliyadda xayeysiiskaaga iyo sida uu u sax yahay.', 'You are responsible for your post and that it is accurate.', 'Unawajibika kwa tangazo lako na usahihi wake.', 'ለማስታወቂያዎና ትክክለኛነቱ እርስዎ ተጠያቂ ነዎት።', 'Vous êtes responsable de votre annonce et de son exactitude.'],
+        ['Ha soo dirin alaab mamnuuc ah (eeg Alaabta mamnuuca ah).', 'Do not post prohibited items (see Prohibited items).', 'Usichapishe bidhaa zilizopigwa marufuku (tazama Bidhaa zilizopigwa marufuku).', 'የተከለከሉ ዕቃዎችን አይለጥፉ (የተከለከሉ ዕቃዎችን ይመልከቱ)።', 'Ne publiez pas d’articles interdits (voir Articles interdits).'],
+        ['Xaraash waa meel kulmin; iibsiga iyo iibinta waxay dhacaan dadka dhexdooda.', 'Xaraash is a meeting place; sales happen between people.', 'Xaraash ni mahali pa kukutana; mauzo hufanyika kati ya watu.', 'Xaraash መገናኛ ቦታ ነው፤ ሽያጭ በሰዎች መካከል ይከናወናል።', 'Xaraash est un lieu de rencontre ; les ventes se font entre particuliers.'],
+        ['Xayeysiisyada jebiya xeerarka waa la tirtiri karaa, akoonkana waa la hakin karaa.', 'Posts that break the rules can be removed and accounts suspended.', 'Matangazo yanayovunja sheria yanaweza kuondolewa na akaunti kusitishwa.', 'ህጎችን የሚጥሱ ማስታወቂያዎች ሊወገዱ፣ መለያዎችም ሊታገዱ ይችላሉ።', 'Les annonces non conformes peuvent être supprimées et les comptes suspendus.']
+      ] }]
+    },
+    suspended: {
+      title: ['Akoonno & lambarro la hakiyay', 'Suspended accounts and numbers', 'Akaunti na namba zilizositishwa', 'የታገዱ መለያዎችና ቁጥሮች', 'Comptes et numéros suspendus'],
+      lead: ['Akoonno ama lambarro waa la hakin karaa marka ay jebiyaan xeerarka.', 'Accounts or numbers can be suspended when they break the rules.', 'Akaunti au namba zinaweza kusitishwa zikivunja sheria.', 'መለያዎች ወይም ቁጥሮች ደንቦችን ሲጥሱ ሊታገዱ ይችላሉ።', 'Des comptes ou numéros peuvent être suspendus s’ils enfreignent les règles.'],
+      blocks: [{ h: ['Waxa la ogaado', 'What to know', 'Cha kujua', 'ማወቅ ያለብዎ', 'À savoir'], ul: [
+        ['Sababaha caadiga ah: khayaano, xayeysiis been ah, ceyrin, ama alaab mamnuuc ah.', 'Common reasons: fraud, fake posts, harassment or prohibited items.', 'Sababu za kawaida: ulaghai, matangazo ya uongo, unyanyasaji au bidhaa zilizopigwa marufuku.', 'የተለመዱ ምክንያቶች፡ ማጭበርበር፣ የሐሰት ማስታወቂያ፣ ትንኮሳ ወይም የተከለከሉ ዕቃዎች።', 'Motifs courants : fraude, fausses annonces, harcèlement ou articles interdits.'],
+        ['Haddii aad aragto lambar shaki leh, soo sheeg xayeysiiskeeda.', 'If you see a suspicious number, report its post.', 'Ukiona namba ya kutiliwa shaka, ripoti tangazo lake.', 'አጠራጣሪ ቁጥር ካዩ ማስታወቂያውን ሪፖርት ያድርጉ።', 'Si vous voyez un numéro suspect, signalez son annonce.'],
+        ['Haddii lagu hakiyay si khalad ah, la xiriir Xaraash.', 'If you were suspended by mistake, contact Xaraash.', 'Ukisitishwa kimakosa, wasiliana na Xaraash.', 'በስህተት ከታገዱ Xaraashን ያግኙ።', 'Si vous êtes suspendu par erreur, contactez Xaraash.'],
+        ['Liiska dadweynaha ee lambarrada la hakiyay weli looma daabicin; waa qorshe.', 'A public list of suspended numbers is not published yet; it is planned.', 'Orodha ya umma ya namba zilizositishwa bado haijachapishwa; imepangwa.', 'የታገዱ ቁጥሮች የሕዝብ ዝርዝር እስካሁን አልታተመም፤ የታቀደ ነው።', 'Une liste publique des numéros suspendus n’est pas encore publiée ; c’est prévu.']
+      ] }]
+    },
+    privacy: {
+      title: ['Siyaasadda gaarka ah', 'Privacy policy', 'Sera ya faragha', 'የግላዊነት ፖሊሲ', 'Politique de confidentialité'],
+      lead: ['Halkan waxaa ku qoran waxa app-kan uu keydiyo iyo cidda arki karta.', 'This explains what this app stores and who can see it.', 'Hii inaeleza programu hii inahifadhi nini na nani anaweza kuona.', 'ይህ መተግበሪያ ምን እንደሚያከማችና ማን ማየት እንደሚችል ያብራራል።', 'Voici ce que cette application enregistre et qui peut le voir.'],
+      blocks: [{ h: ['Xogta', 'Your data', 'Data yako', 'ውሂብዎ', 'Vos données'], ul: [
+        ['Magacaaga iyo lambarkaaga (haddii aad gelisid) waxay ku jiraan browser-kaaga si foomka loogu buuxiyo.', 'Your name and number (if you enter them) stay in your browser to prefill the form.', 'Jina na namba yako (ukiziweka) hubaki kwenye kivinjari chako kujaza fomu.', 'ስምዎና ቁጥርዎ (ካስገቡ) ቅጹን ለመሙላት በአሳሽዎ ውስጥ ይቆያሉ።', 'Votre nom et numéro (si vous les saisissez) restent dans votre navigateur pour préremplir le formulaire.'],
+        ['Marka aad xayeysiis daabacdo, cinwaanka, qiimaha, magaca, lambarka iyo sawirrada waa la wadaagaa oo qof walba wuu arki karaa.', 'When you publish a post, its title, price, name, number and photos are shared and visible to everyone.', 'Unapochapisha tangazo, kichwa, bei, jina, namba na picha hushirikiwa na kila mtu anaweza kuona.', 'ማስታወቂያ ሲያትሙ ርዕሱ፣ ዋጋው፣ ስምዎ፣ ቁጥርዎና ፎቶዎቹ ይጋራሉ፣ ሁሉም ሰው ማየት ይችላል።', 'Quand vous publiez une annonce, son titre, son prix, votre nom, votre numéro et ses photos sont partagés et visibles par tous.'],
+        ['Furaha edit-ka waxaa lagu keydiyaa browser-ka; ha la wadaagin.', 'The edit key is stored in your browser; do not share it.', 'Ufunguo wa kuhariri umehifadhiwa kwenye kivinjari; usiushiriki.', 'የማስተካከያ ቁልፉ በአሳሽዎ ውስጥ ተከማችቷል፤ አያጋሩት።', 'La clé de modification est stockée dans votre navigateur ; ne la partagez pas.'],
+        ['Haddii chatbot-ka AI ee lacagta ah la shido, fariimahaaga waxaa loo diraa adeegga AI; kan bilaashka ah wuxuu fariimaha ku hayaa aaladdaada.', 'If the paid AI chat is switched on, your messages go to the AI service; the free built-in assistant keeps them on your device.', 'Gumzo la AI la kulipia likiwashwa, ujumbe wako hutumwa kwa huduma ya AI; msaidizi wa bure uliojengewa hubaki kwenye kifaa chako.', 'የሚከፈልበት የAI ውይይት ከበራ መልዕክቶችዎ ወደ AI አገልግሎት ይላካሉ፤ ነጻው አብሮ የተሰራ ረዳት በመሣሪያዎ ላይ ያቆያቸዋል።', 'Si le chat IA payant est activé, vos messages vont au service d’IA ; l’assistant gratuit intégré les garde sur votre appareil.']
+      ] }]
+    },
+    membership: {
+      title: ['Xubinnimada iibiyeyaasha & xafiisyada', 'Dealer and agency membership', 'Uanachama wa wauzaji na ofisi', 'የነጋዴዎችና ኤጀንሲዎች አባልነት', 'Adhésion des concessionnaires et agences'],
+      lead: ['Dilaaliinta gawaarida iyo xafiisyada guryaha waxay codsan karaan akoon ganacsi.', 'Car dealers and real-estate offices can ask for a business account.', 'Wauzaji wa magari na ofisi za mali wanaweza kuomba akaunti ya biashara.', 'የመኪና ነጋዴዎችና የሪል እስቴት ቢሮዎች የንግድ መለያ መጠየቅ ይችላሉ።', 'Les concessionnaires et agences immobilières peuvent demander un compte professionnel.'],
+      blocks: [{ h: ['Xaaladda hadda', 'Current status', 'Hali ya sasa', 'አሁን ያለበት ሁኔታ', 'Situation actuelle'], ul: [
+        ['Waxaa la qorsheynayaa: calaamad ganacsi, bog gaar ah iyo tirakoob.', 'Planned: a business badge, a dedicated page and statistics.', 'Imepangwa: beji ya biashara, ukurasa maalum na takwimu.', 'የታቀዱ፡ የንግድ ምልክት፣ የራስ ገጽና ስታቲስቲክስ።', 'Prévu : un badge professionnel, une page dédiée et des statistiques.'],
+        ['Qiimaha iyo shuruudaha weli lama dejin.', 'Prices and terms are not set yet.', 'Bei na masharti bado havijawekwa.', 'ዋጋና ውሎች እስካሁን አልተወሰኑም።', 'Les tarifs et conditions ne sont pas encore fixés.'],
+        ['Si aad u muujiso xiisaha, la xiriir Xaraash (eeg La xiriir).', 'To show your interest, contact Xaraash (see Contact).', 'Ili kuonyesha nia yako, wasiliana na Xaraash (tazama Wasiliana nasi).', 'ፍላጎትዎን ለማሳየት Xaraashን ያግኙ (ያግኙን ይመልከቱ)።', 'Pour montrer votre intérêt, contactez Xaraash (voir Contact).']
+      ] }]
+    },
+    prohibited: {
+      title: ['Alaabta mamnuuca ah', 'Prohibited items', 'Bidhaa zilizopigwa marufuku', 'የተከለከሉ ዕቃዎች', 'Articles interdits'],
+      lead: ['Alaabtan iyo adeegyadan lama iibin karo Xaraash.', 'These items and services cannot be sold on Xaraash.', 'Bidhaa na huduma hizi haziwezi kuuzwa kwenye Xaraash.', 'እነዚህ ዕቃዎችና አገልግሎቶች በXaraash ላይ መሸጥ አይችሉም።', 'Ces articles et services ne peuvent pas être vendus sur Xaraash.'],
+      blocks: [
+        { h: ['Liiska', 'List', 'Orodha', 'ዝርዝር', 'Liste'], ul: [
+          ['Hubka, rasaasta iyo walxaha qarxa', 'Weapons, ammunition and explosives', 'Silaha, risasi na vilipuzi', 'መሳሪያ፣ ጥይትና ፈንጂ', 'Armes, munitions et explosifs'],
+          ['Daroogada sharci-darrada ah', 'Illegal drugs', 'Dawa za kulevya haramu', 'ሕገ-ወጥ እጾች', 'Drogues illégales'],
+          ['Alaab la xaday ama been abuur ah', 'Stolen or counterfeit goods', 'Bidhaa zilizoibiwa au bandia', 'የተሰረቁ ወይም ሐሰተኛ ዕቃዎች', 'Marchandises volées ou contrefaites'],
+          ['Dadka ama xubnaha jirka (ka ganacsiga)', 'People or human organs (trafficking)', 'Binadamu au viungo vya mwili (biashara haramu)', 'ሰዎች ወይም የአካል ክፍሎች (ዝውውር)', 'Êtres humains ou organes (traite)'],
+          ['Waxyaabaha dadka waaweyn ama waxyeello u geysta caruurta', 'Adult content or anything that harms children', 'Maudhui ya watu wazima au kinachowadhuru watoto', 'የአዋቂ ይዘት ወይም ሕፃናትን የሚጎዳ ማንኛውም ነገር', 'Contenu adulte ou tout ce qui nuit aux enfants'],
+          ['Xayawaan duur ah oo la ilaaliyo iyo fool maroodi', 'Protected wildlife and ivory', 'Wanyamapori walio hatarini na pembe za ndovu', 'የተጠበቁ የዱር እንስሳትና የዝሆን ጥርስ', 'Faune protégée et ivoire'],
+          ['Dukumiinti ama aqoonsi been abuur ah', 'Fake documents or IDs', 'Hati au vitambulisho bandia', 'ሐሰተኛ ሰነዶች ወይም መታወቂያዎች', 'Faux documents ou pièces d’identité'],
+          ['Khayaano iyo qorshayaal lacag degdeg ah', 'Scams and get-rich-quick schemes', 'Ulaghai na mipango ya utajiri wa haraka', 'ማጭበርበርና ፈጣን ሀብት ማግኛ ዘዴዎች', 'Arnaques et schémas d’enrichissement rapide']
+        ] },
+        { h: ['Ogow', 'Note', 'Kumbuka', 'ማስታወሻ', 'Remarque'], p: [['Sharciyada way ku kala duwan yihiin dal kasta. Haddii aad shaki qabto, ha soo dirin.', 'Laws differ in every country. If you are unsure, do not post.', 'Sheria hutofautiana kila nchi. Ukiwa na shaka, usichapishe.', 'ሕጎች በየአገሩ ይለያያሉ። ካልተረጋገጡ አይለጥፉ።', 'Les lois diffèrent selon les pays. En cas de doute, ne publiez pas.']] }
+      ]
+    },
+    rating: {
+      title: ['Qiimeyn', 'Rating', 'Ukadiriaji', 'ደረጃ መስጠት', 'Évaluation'],
+      lead: ['Noo sheeg sida Xaraash kuugu shaqeyso.', 'Tell us how Xaraash works for you.', 'Tuambie jinsi Xaraash inavyokufanyia kazi.', 'Xaraash እንዴት እንደሚሰራልዎ ይንገሩን።', 'Dites-nous comment Xaraash fonctionne pour vous.'],
+      blocks: [{ h: ['Qiimee Xaraash', 'Rate Xaraash', 'Kadiria Xaraash', 'Xaraashን ይገምግሙ', 'Évaluer Xaraash'], rating: true }]
+    },
+    install: {
+      title: ['Rakib app-ka', 'Install the app', 'Sakinisha programu', 'መተግበሪያውን ጫን', 'Installer l’application'],
+      lead: ['Xaraash waxay u shaqeysaa sida app taleefankaaga.', 'Xaraash works like an app on your phone.', 'Xaraash hufanya kazi kama programu kwenye simu yako.', 'Xaraash በስልክዎ ላይ እንደ መተግበሪያ ይሰራል።', 'Xaraash fonctionne comme une application sur votre téléphone.'],
+      blocks: [
+        { h: ['Rakib hadda', 'Install now', 'Sakinisha sasa', 'አሁን ጫን', 'Installer maintenant'], install: true, ol: [
+          ['Android (Chrome): fur menu-ga ⋮, kadibna Add to Home Screen.', 'Android (Chrome): open the ⋮ menu, then Add to Home Screen.', 'Android (Chrome): fungua menyu ⋮, kisha Add to Home Screen.', 'Android (Chrome): ⋮ ምናሌውን ከፍተው Add to Home Screen ይምረጡ።', 'Android (Chrome) : ouvrez le menu ⋮, puis Ajouter à l’écran d’accueil.'],
+          ['iPhone (Safari): taabo Share, kadibna Add to Home Screen.', 'iPhone (Safari): tap Share, then Add to Home Screen.', 'iPhone (Safari): bonyeza Share, kisha Add to Home Screen.', 'iPhone (Safari): Share ይጫኑ፣ ከዚያ Add to Home Screen።', 'iPhone (Safari) : touchez Partager, puis Sur l’écran d’accueil.']
+        ] },
+        { h: ['App Store iyo Google Play', 'App Store and Google Play', 'App Store na Google Play', 'App Store እና Google Play', 'App Store et Google Play'], p: [['Nooca App Store iyo Google Play weli looma daabicin. Hadda isticmaal rakibidda boggan.', 'The App Store and Google Play versions are not published yet. Use this page install for now.', 'Matoleo ya App Store na Google Play bado hayajachapishwa. Kwa sasa tumia usakinishaji wa ukurasa huu.', 'የApp Store እና Google Play ስሪቶች እስካሁን አልታተሙም። አሁን ከዚህ ገጽ ይጫኑ።', 'Les versions App Store et Google Play ne sont pas encore publiées. Utilisez l’installation depuis cette page.']] }
+      ]
+    },
     contact: {
       title: ['La xiriir', 'Contact', 'Wasiliana nasi', 'ያግኙን', 'Contact'],
       lead: ['Su’aal, talo ama dhibaato ma qabtaa? Si toos ah noola soo xiriir.', 'Have a question, suggestion or problem? Contact us directly.', 'Una swali, pendekezo au tatizo? Wasiliana nasi moja kwa moja.', 'ጥያቄ፣ ሐሳብ ወይም ችግር አለዎት? በቀጥታ ያግኙን።', 'Une question, une suggestion ou un problème ? Contactez-nous directement.'],
@@ -893,7 +1021,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
       (p.photos && p.photos.length ? '<div class="gallery">' + p.photos.map(function (u) { return '<img src="' + u + '" alt="">'; }).join('') + '</div>' : '<div class="thumb big" style="--h:' + HUE[p.cat] + '">' + svg(p.cat) + '</div>') +
       '<dl class="specs"><dt>' + esc(x.price) + '</dt><dd>' + esc(price) + '</dd><dt>' + esc(x.city) + '</dt><dd>' + esc(p.city) + '</dd><dt>' + esc(x.cat) + '</dt><dd>' + esc(t().cat[p.cat]) + '</dd><dt>' + esc(x.posted) + '</dt><dd>' + esc(ago(p.age)) + '</dd><dt>' + esc(x.seller) + '</dt><dd>' + esc(who) + '</dd>' + (p.phone ? '<dt>' + esc(t().phoneLbl) + '</dt><dd>' + esc(p.phone) + '</dd>' : '') + '</dl>' +
       '<p>' + esc(x.desc.replace('{u}', who)) + '</p><p class="eg">' + esc(x.descTag) + '</p>' +
-      '<div class="btnrow">' + contactBtns(p, x) + '<button class="ghost" type="button" data-soon>' + esc(x.report) + '</button>' + ownerBtns(p) + '</div>' +
+      '<div class="btnrow">' + contactBtns(p, x) + '<button class="ghost" type="button" data-action="report" data-id="' + esc(p.rid || p.id) + '">' + esc(x.report) + '</button>' + ownerBtns(p) + '</div>' +
       '<div class="tip">' + esc(x.tip) + ' <button type="button" data-page="safety">' + esc(x.tipLink) + '</button></div></article>' +
       '<aside class="panel"><h2 style="margin-top:0">' + esc(x.similar) + '</h2><div class="sim">' + sim.map(function (q) {
         return '<button type="button" data-ad-go="' + q.id + '">' + thumbHtml(q) + '<span>' + esc(q.title[li] || q.title[0]) + '</span></button>';
@@ -906,11 +1034,15 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     p.blocks.forEach(function (b) {
       h += '<section><h2>' + esc(b.h[li]) + '</h2>';
       if (b.chips) h += '<div class="pchips">' + b.chips.map(function (c) { return '<span style="--c:' + c[1] + '"><i></i>' + esc(c[0][li]) + '</span>'; }).join('') + '</div>';
-      if (b.contact) h += '<p><strong>Abdullahi M. Kulane</strong></p><p><a class="phone" href="tel:+252615128202">+252 615 128 202</a></p>';
+      if (b.contact) h += '<p><strong>Abdullahi M. Kulane</strong></p><p><a class="phone" href="tel:+252615128202">+252 615 128 202</a> · <a href="https://wa.me/252615128202" target="_blank" rel="noopener">' + esc(t().whatsapp) + '</a></p>';
       if (b.p) b.p.forEach(function (q) { h += '<p>' + esc(q[li]) + '</p>'; });
       if (b.ul) h += '<ul>' + b.ul.map(function (q) { return '<li>' + esc(q[li]) + '</li>'; }).join('') + '</ul>';
+      if (b.qa) h += b.qa.map(function (q) { return '<details class="qa"><summary>' + esc(q[0][li]) + '</summary><p>' + esc(q[1][li]) + '</p></details>'; }).join('');
+      if (b.rating) h += ratingBox();
+      if (b.install) h += '<div class="btnrow"><button class="post" type="button" data-action="install">' + esc(R('install')) + '</button></div>';
+      if (b.wa) h += '<p><a class="ghost" href="https://wa.me/252615128202" target="_blank" rel="noopener">' + esc(t().whatsapp) + '</a></p>';
       if (b.ol) h += '<ol>' + b.ol.map(function (q) { return '<li>' + esc(q[li]) + '</li>'; }).join('') + '</ol>';
-      if (b.login) h += '<div class="loginbox"><span>' + esc(x.loginAsk) + '</span><button type="button" data-soon>' + esc(t().login) + '</button></div>';
+      if (b.login) h += '<div class="loginbox"><span>' + esc(x.loginAsk) + '</span><button type="button" data-action="profile">' + esc(t().login) + '</button></div>';
       h += '</section>';
     });
     $('viewPage').innerHTML = h + '<p class="eg">' + esc(x.eg) + '</p></article>';
@@ -930,7 +1062,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   function dropKey(id) { try { var m = getKeys(); delete m[id]; localStorage.setItem('xaraash-keys', JSON.stringify(m)); } catch (e) {} }
   function savedContact() { try { return JSON.parse(localStorage.getItem('xaraash-contact') || '{}') || {}; } catch (e) { return {}; } }
   function contactBtns(p, x) {
-    if (!p.phone) return '<button class="post" type="button" data-soon>' + esc(x.contact) + '</button>';
+    if (!p.phone) return '<button class="post" type="button" data-action="samplecontact">' + esc(x.contact) + '</button>';
     var tel = p.phone.replace(/[^\d+]/g, ''), wa = p.phone.replace(/\D/g, '');
     return '<a class="post" href="tel:' + esc(tel) + '">' + esc(t().call) + '</a><a class="ghost" href="https://wa.me/' + esc(wa) + '" target="_blank" rel="noopener">' + esc(t().whatsapp) + '</a>';
   }
@@ -982,6 +1114,110 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
       if (dl.getAttribute('data-arm')) deleteRemote(dl.getAttribute('data-del'));
       else { dl.setAttribute('data-arm', '1'); dl.textContent = t().delSure; }
     }
+  });
+
+
+  /* ---------- Profile, report, rating, install ---------- */
+  var NEWR = {
+    profile: ['Xogtayda', 'My profile', 'Wasifu wangu', 'የእኔ መገለጫ', 'Mon profil'],
+    pname: ['Magacaaga', 'Your name', 'Jina lako', 'ስምዎ', 'Votre nom'],
+    pphone: ['Lambarka taleefanka', 'Phone number', 'Namba ya simu', 'ስልክ ቁጥር', 'Numéro de téléphone'],
+    psave: ['Keydi', 'Save', 'Hifadhi', 'አስቀምጥ', 'Enregistrer'],
+    pout: ['Ka bax (tirtir xogta)', 'Sign out (clear data)', 'Ondoka (futa data)', 'ውጣ (ውሂብ አጽዳ)', 'Se déconnecter (effacer)'],
+    pnote: ['Xogtan waxay ku jirtaa browser-kaaga oo keliya, waxayna ku buuxisaa foomka xayeysiiska.', 'This stays only in your browser and prefills your post form.', 'Hii hubaki kwenye kivinjari chako tu na hujaza fomu ya tangazo.', 'ይህ በአሳሽዎ ውስጥ ብቻ ይቆያል፣ የማስታወቂያ ቅጹንም ይሞላል።', 'Cela reste uniquement dans votre navigateur et préremplit le formulaire.'],
+    pbad: ['Lambarku sax maaha.', 'That phone number is not valid.', 'Namba ya simu si sahihi.', 'ስልክ ቁጥሩ ትክክል አይደለም።', 'Ce numéro n’est pas valide.'],
+    psaved: ['Waa la keydiyay.', 'Saved.', 'Imehifadhiwa.', 'ተቀምጧል።', 'Enregistré.'],
+    pcleared: ['Xogta waa la tirtiray.', 'Your data was cleared.', 'Data imefutwa.', 'ውሂቡ ጸድቷል።', 'Données effacées.'],
+    close: ['Xidh', 'Close', 'Funga', 'ዝጋ', 'Fermer'],
+    rtitle: ['Soo sheeg xayeysiiskan', 'Report this post', 'Ripoti tangazo hili', 'ይህን ማስታወቂያ ሪፖርት ያድርጉ', 'Signaler cette annonce'],
+    r1: ['Spam ama mid soo noqnoqda', 'Spam or repeated', 'Barua taka au linarudiwa', 'ስፓም ወይም ተደጋጋሚ', 'Spam ou répétée'],
+    r2: ['Khayaano / been', 'Scam / fake', 'Ulaghai / uongo', 'ማጭበርበር / ሐሰት', 'Arnaque / faux'],
+    r3: ['Qayb khaldan', 'Wrong category', 'Kategoria isiyo sahihi', 'የተሳሳተ ምድብ', 'Mauvaise catégorie'],
+    r4: ['Alaab mamnuuc ah', 'Prohibited item', 'Bidhaa iliyopigwa marufuku', 'የተከለከለ ዕቃ', 'Article interdit'],
+    r5: ['Wax kale', 'Something else', 'Kitu kingine', 'ሌላ', 'Autre'],
+    rnote: ['Faahfaahin (ikhtiyaari)', 'Details (optional)', 'Maelezo (hiari)', 'ዝርዝር (አማራጭ)', 'Détails (facultatif)'],
+    rsend: ['Dir', 'Send', 'Tuma', 'ላክ', 'Envoyer'],
+    rsent: ['Waad ku mahadsantahay. Warbixinta waa la helay.', 'Thank you. Your report was received.', 'Asante. Ripoti imepokelewa.', 'አመሰግናለሁ። ሪፖርትዎ ደርሷል።', 'Merci. Votre signalement a été reçu.'],
+    rlocal: ['Warbixinta waxaa lagu keydiyay aaladdan. Waxay gaari doontaa kooxda marka kaydka wadaaga la shido.', 'Your report was saved on this device. It will reach the team once shared storage is switched on.', 'Ripoti imehifadhiwa kwenye kifaa hiki. Itamfikia timu hifadhi ya pamoja ikiwashwa.', 'ሪፖርትዎ በዚህ መሣሪያ ላይ ተቀምጧል። የጋራ ማከማቻ ሲበራ ወደ ቡድኑ ይደርሳል።', 'Votre signalement est enregistré sur cet appareil. Il parviendra à l’équipe quand le stockage partagé sera activé.'],
+    rfail: ['Lama dirin. Isku day mar kale.', 'Could not send. Try again.', 'Imeshindwa kutuma. Jaribu tena.', 'አልተላከም። እንደገና ይሞክሩ።', 'Échec de l’envoi. Réessayez.'],
+    rsample: ['Kani waa xayeysiis tusaale ah; ma jiro qof dhab ah oo la xiriiri karo. Xayeysiisyada dhabta ah waxay leeyihiin badhamada Wac iyo WhatsApp.', 'This is a sample listing; there is no real seller to contact. Real posts have Call and WhatsApp buttons.', 'Hili ni tangazo la mfano; hakuna muuzaji halisi. Matangazo halisi yana vitufe vya Piga simu na WhatsApp.', 'ይህ ናሙና ማስታወቂያ ነው፤ የሚያገኙት እውነተኛ ሻጭ የለም። እውነተኛ ማስታወቂያዎች የመደወያና WhatsApp አዝራሮች አሏቸው።', 'Ceci est une annonce d’exemple ; aucun vendeur réel. Les vraies annonces ont des boutons Appeler et WhatsApp.'],
+    rcomment: ['Fikradaada (ikhtiyaari)', 'Your comment (optional)', 'Maoni yako (hiari)', 'አስተያየትዎ (አማራጭ)', 'Votre commentaire (facultatif)'],
+    rthanks: ['Mahadsanid! Qiimeyntaada waa la helay.', 'Thank you! Your rating was received.', 'Asante! Ukadiriaji wako umepokelewa.', 'አመሰግናለሁ! ደረጃዎ ደርሷል።', 'Merci ! Votre note a été reçue.'],
+    rpick: ['Dooro xiddigo marka hore.', 'Pick the stars first.', 'Chagua nyota kwanza.', 'መጀመሪያ ኮከቦቹን ይምረጡ።', 'Choisissez d’abord les étoiles.'],
+    install: ['Rakib app-ka', 'Install the app', 'Sakinisha programu', 'መተግበሪያውን ጫን', 'Installer l’application'],
+    instDone: ['App-ka waa la rakibay.', 'App installed.', 'Programu imesakinishwa.', 'መተግበሪያው ተጭኗል።', 'Application installée.'],
+    instHow: ['Browser-kaagu ma bixin karo rakibid toos ah. Raac tillaabooyinka hoose.', 'Your browser cannot install directly. Follow the steps below.', 'Kivinjari chako hakiwezi kusakinisha moja kwa moja. Fuata hatua zilizo hapa chini.', 'አሳሽዎ በቀጥታ መጫን አይችልም። ከታች ያሉትን ደረጃዎች ይከተሉ።', 'Votre navigateur ne peut pas installer directement. Suivez les étapes ci-dessous.']
+  };
+  function R(k) { return NEWR[k][LI()]; }
+  function modal(html) { $('sheet2').innerHTML = html; $('veil2').hidden = false; var f = $('sheet2').querySelector('input,textarea,button'); if (f) f.focus(); }
+  function closeModal() { $('veil2').hidden = true; }
+  function lsGet(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function refreshLogin() {
+    var c = savedContact(), nm = (c.name || '').trim();
+    var lbl = nm ? nm.split(/\s+/)[0] : t().login;
+    document.querySelectorAll('#loginBtn span, [data-tab="login"] span').forEach(function (el) { el.textContent = lbl; });
+  }
+  function postJSON(obj) {
+    return fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(obj) }).then(function (r) { return r.json(); });
+  }
+  function openProfile() {
+    var c = savedContact();
+    modal('<h2>' + esc(R('profile')) + '</h2>' +
+      '<label class="field"><span>' + esc(R('pname')) + '</span><input id="pr-name" maxlength="40" autocomplete="name" value="' + esc(c.name || '') + '"></label>' +
+      '<label class="field"><span>' + esc(R('pphone')) + '</span><input id="pr-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" value="' + esc(c.phone || '') + '" placeholder="+252 …"></label>' +
+      '<p class="eg">' + esc(R('pnote')) + '</p>' +
+      '<div class="acts"><button type="button" class="ghost" data-m="out">' + esc(R('pout')) + '</button><button type="button" class="ghost" data-m="close">' + esc(R('close')) + '</button><button type="button" class="post" data-m="psave">' + esc(R('psave')) + '</button></div>');
+  }
+  function openReport(id) {
+    modal('<h2>' + esc(R('rtitle')) + '</h2><div class="radios">' +
+      ['r1', 'r2', 'r3', 'r4', 'r5'].map(function (k, i) { return '<label><input type="radio" name="rr" value="' + k + '"' + (i === 0 ? ' checked' : '') + '> ' + esc(R(k)) + '</label>'; }).join('') +
+      '</div><label class="field"><span>' + esc(R('rnote')) + '</span><textarea id="rr-note" maxlength="300"></textarea></label>' +
+      '<div class="acts"><button type="button" class="ghost" data-m="close">' + esc(R('close')) + '</button><button type="button" class="post" data-m="rsend" data-id="' + esc(id || '') + '">' + esc(R('rsend')) + '</button></div>');
+  }
+  var rateStars = 0;
+  function ratingBox() {
+    return '<div class="stars" id="stars" role="group">' + [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" data-star="' + n + '" aria-pressed="false" aria-label="' + n + '">★</button>'; }).join('') + '</div>' +
+      '<label class="field"><span>' + esc(R('rcomment')) + '</span><textarea id="rate-note" maxlength="300"></textarea></label>' +
+      '<button class="post" type="button" data-action="ratesend">' + esc(R('rsend')) + '</button>';
+  }
+  var deferredInstall = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; });
+  window.addEventListener('appinstalled', function () { toast(R('instDone')); });
+  function doAction(a, b) {
+    if (a === 'profile') openProfile();
+    else if (a === 'report') openReport(b && b.dataset.id);
+    else if (a === 'samplecontact') toast(R('rsample'));
+    else if (a === 'install') {
+      if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; } else toast(R('instHow'));
+    } else if (a === 'ratesend') {
+      if (!rateStars) { toast(R('rpick')); return; }
+      var note = ($('rate-note').value || '').trim().slice(0, 300), stars = rateStars;
+      if (API()) postJSON({ action: 'rate', stars: stars, comment: note }).then(function (d) { toast(d && d.ok ? R('rthanks') : R('rfail')); }).catch(function () { toast(R('rfail')); });
+      else { var rl = lsGet('xaraash-ratings', []); rl.push({ stars: stars, comment: note, at: Date.now() }); lsSet('xaraash-ratings', rl.slice(-20)); toast(R('rthanks')); }
+    }
+  }
+  $('sheet2').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-m]'); if (!b) return; var m = b.dataset.m;
+    if (m === 'close') closeModal();
+    else if (m === 'psave') {
+      var ph = $('pr-phone').value.trim(), cp = cleanPhone(ph);
+      if (ph && !cp) { toast(R('pbad')); return; }
+      lsSet('xaraash-contact', { name: $('pr-name').value.trim().slice(0, 40), phone: cp });
+      refreshLogin(); closeModal(); toast(R('psaved'));
+    } else if (m === 'out') {
+      try { localStorage.removeItem('xaraash-contact'); } catch (er) {}
+      refreshLogin(); closeModal(); toast(R('pcleared'));
+    } else if (m === 'rsend') {
+      var rs = ($('sheet2').querySelector('input[name=rr]:checked') || {}).value || 'r5', nt = ($('rr-note').value || '').trim().slice(0, 300), id = b.dataset.id;
+      if (API()) { postJSON({ action: 'report', postId: id, reason: rs, note: nt }).then(function (d) { closeModal(); toast(d && d.ok ? R('rsent') : R('rfail')); }).catch(function () { toast(R('rfail')); }); }
+      else { var rl = lsGet('xaraash-reports', []); rl.push({ postId: id, reason: rs, note: nt, at: Date.now() }); lsSet('xaraash-reports', rl.slice(-50)); closeModal(); toast(R('rlocal')); }
+    }
+  });
+  document.addEventListener('click', function (e) {
+    var st = e.target.closest('[data-star]'); if (!st) return;
+    rateStars = +st.dataset.star;
+    document.querySelectorAll('#stars button').forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.star <= rateStars ? 'true' : 'false'); });
   });
 
   /* ---------- Shared storage (Google Sheets + Drive through Apps Script) ---------- */
@@ -1204,7 +1440,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     else if (k === 'search') { chatToggle(false); nav(''); window.scrollTo(0, 0); $('q').focus(); }
     else if (k === 'add') { openForm(null); }
     else if (k === 'chat') { chatToggle($('chat').hidden); }
-    else if (k === 'login') { toast(t().loginSoon); }
+    else if (k === 'login') { doAction('profile'); }
   });
 
   var sl = ls('xaraash-lang'); if (sl && T[sl]) S.lang = sl;
