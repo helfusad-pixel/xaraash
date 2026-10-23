@@ -1034,7 +1034,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     p.blocks.forEach(function (b) {
       h += '<section><h2>' + esc(b.h[li]) + '</h2>';
       if (b.chips) h += '<div class="pchips">' + b.chips.map(function (c) { return '<span style="--c:' + c[1] + '"><i></i>' + esc(c[0][li]) + '</span>'; }).join('') + '</div>';
-      if (b.contact) h += '<p><strong>Abdullahi M. Kulane</strong></p><p><a class="phone" href="tel:+252615128202">+252 615 128 202</a> · <a href="https://wa.me/252615128202" target="_blank" rel="noopener">' + esc(t().whatsapp) + '</a></p>';
+      if (b.contact) h += '<p><strong>Abdullahi M. Kulane</strong></p><p><a class="phone" href="tel:+252615128202">+252 615 128 202</a> · <a href="https://wa.me/252615128202" target="_blank" rel="noopener">' + esc(t().whatsapp) + '</a></p><p><a class="phone" href="tel:+252622562727">+252 622 562 727</a> · <a href="https://wa.me/252622562727" target="_blank" rel="noopener">' + esc(t().whatsapp) + '</a></p>';
       if (b.p) b.p.forEach(function (q) { h += '<p>' + esc(q[li]) + '</p>'; });
       if (b.ul) h += '<ul>' + b.ul.map(function (q) { return '<li>' + esc(q[li]) + '</li>'; }).join('') + '</ul>';
       if (b.qa) h += b.qa.map(function (q) { return '<details class="qa"><summary>' + esc(q[0][li]) + '</summary><p>' + esc(q[1][li]) + '</p></details>'; }).join('');
