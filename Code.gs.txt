@@ -144,6 +144,8 @@ function doPost(e) {
         }
       }
       sh.appendRow([id, new Date(), p.cat, p.city, p.price, p.title, p.name || ('Member ' + id.slice(0, 4)), JSON.stringify(ids), 'visible', p.phone, editKey, p.acct]);
+      // A verification token can create one post only. This reduces replay/abuse.
+      cache.remove('tok' + String(body.token || ''));
       return json_({ ok: true, id: id, editKey: editKey });
     }
 
@@ -179,7 +181,10 @@ function doPost(e) {
 //   WA_TOKEN     permanent access token
 //   WA_PHONE_ID  the "Phone number ID" of your WhatsApp sender
 //   WA_TEMPLATE  approved authentication template name (default xaraash_code)
-//   WA_LANG      template language code (default en)
+//   WA_LANG           exact approved template language code (default en_US)
+//   WA_API_VERSION    Graph API version (default v26.0)
+//   WA_TEMPLATE_MODE  authentication, custom_body, or custom_body_url
+// Keep these values in Script Properties, never in index.html.
 function digits_(v) {
   var d = String(v || '').replace(/\D/g, '');
   return d.length >= 8 && d.length <= 15 ? d : '';
@@ -194,42 +199,110 @@ function hash_(code, phone) {
 function sendCode_(phone) {
   var d = digits_(phone);
   if (!d) return json_({ ok: false, error: 'bad_phone' });
+
   var props = PropertiesService.getScriptProperties();
-  var token = props.getProperty('WA_TOKEN'), pid = props.getProperty('WA_PHONE_ID');
+  var token = props.getProperty('WA_TOKEN');
+  var pid = props.getProperty('WA_PHONE_ID');
   if (!token || !pid) return json_({ ok: false, error: 'wa_not_configured' });
+
   var cache = CacheService.getScriptCache();
-  var hk = 'sc' + d + Math.floor(Date.now() / 3600000), hn = Number(cache.get(hk) || 0);
-  if (hn >= 3) return json_({ ok: false, error: 'too_many' });
-  var code = ('00000' + (parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000)).slice(-6);
-  var res = UrlFetchApp.fetch('https://graph.facebook.com/v20.0/' + pid + '/messages', {
-    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-    headers: { Authorization: 'Bearer ' + token },
-    payload: JSON.stringify({
-      messaging_product: 'whatsapp', to: d, type: 'template',
-      template: { name: props.getProperty('WA_TEMPLATE') || 'xaraash_code', language: { code: props.getProperty('WA_LANG') || 'en' },
-        components: [
-          { type: 'body', parameters: [{ type: 'text', text: code }] },
-          { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: code }] }
-        ] }
-    })
-  });
-  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) return json_({ ok: false, error: 'send_failed' });
-  cache.put(hk, String(hn + 1), 3700);
-  cache.put('code' + d, hash_(code, d), 600);
+  var now = Date.now();
+  var hourKey = 'sc' + d + Math.floor(now / 3600000);
+  var hourCount = Number(cache.get(hourKey) || 0);
+
+  // Maximum 3 sends per phone in a rolling hour bucket, plus a 60-second resend wait.
+  if (hourCount >= 3) return json_({ ok: false, error: 'too_many' });
+  if (cache.get('cool' + d)) return json_({ ok: false, error: 'wait_before_resend' });
+
+  // Count the attempt before calling Meta, so API failures cannot be abused for unlimited retries.
+  cache.put(hourKey, String(hourCount + 1), 3700);
+  cache.put('cool' + d, '1', 60);
+
+  // Only one active code per phone at a time.
+  cache.remove('code' + d);
   cache.remove('att' + d);
-  return json_({ ok: true });
+
+  var code = ('00000' + (parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000)).slice(-6);
+  var apiVersion = props.getProperty('WA_API_VERSION') || 'v26.0';
+  var templateName = props.getProperty('WA_TEMPLATE') || 'xaraash_code';
+  var lang = props.getProperty('WA_LANG') || 'en_US';
+  var templateMode = String(props.getProperty('WA_TEMPLATE_MODE') || 'authentication').toLowerCase();
+
+  var components;
+  if (templateMode === 'authentication') {
+    // Use an approved Meta AUTHENTICATION template with its OTP/copy-code URL button.
+    components = [
+      { type: 'body', parameters: [{ type: 'text', text: code }] },
+      { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: code }] }
+    ];
+  } else if (templateMode === 'custom_body') {
+    // Use a separately approved custom template whose BODY contains a {{1}} variable.
+    components = [
+      { type: 'body', parameters: [{ type: 'text', text: code }] }
+    ];
+  } else if (templateMode === 'custom_body_url') {
+    // Use a separately approved custom template with a BODY variable and a URL button variable.
+    components = [
+      { type: 'body', parameters: [{ type: 'text', text: code }] },
+      { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: code }] }
+    ];
+  } else {
+    return json_({ ok: false, error: 'bad_template_mode' });
+  }
+
+  var response;
+  try {
+    response = UrlFetchApp.fetch('https://graph.facebook.com/' + apiVersion + '/' + encodeURIComponent(pid) + '/messages', {
+      method: 'post',
+      contentType: 'application/json',
+      muteHttpExceptions: true,
+      headers: { Authorization: 'Bearer ' + token },
+      payload: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: d,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: { code: lang },
+          components: components
+        }
+      })
+    });
+  } catch (err) {
+    return json_({ ok: false, error: 'send_failed' });
+  }
+
+  var status = response.getResponseCode();
+  if (status < 200 || status >= 300) {
+    // Do not return Meta's raw response to the public client because it may expose internal details.
+    return json_({ ok: false, error: 'send_failed' });
+  }
+
+  cache.put('code' + d, hash_(code, d), 600);
+  return json_({ ok: true, expiresIn: 600, resendAfter: 60 });
 }
 function verifyCode_(phone, code) {
-  var d = digits_(phone), c = String(code || '').replace(/\D/g, '');
+  var d = digits_(phone);
+  var c = String(code || '').replace(/\D/g, '');
   if (!d || c.length !== 6) return json_({ ok: false, error: 'invalid' });
+
   var cache = CacheService.getScriptCache();
-  var att = Number(cache.get('att' + d) || 0);
-  if (att >= 5) return json_({ ok: false, error: 'too_many' });
+  var attemptKey = 'att' + d;
+  var attempts = Number(cache.get(attemptKey) || 0);
+  if (attempts >= 5) return json_({ ok: false, error: 'too_many' });
+
   var stored = cache.get('code' + d);
   if (!stored) return json_({ ok: false, error: 'expired' });
-  if (stored !== hash_(c, d)) { cache.put('att' + d, String(att + 1), 600); return json_({ ok: false, error: 'wrong_code' }); }
+
+  if (stored !== hash_(c, d)) {
+    cache.put(attemptKey, String(attempts + 1), 600);
+    return json_({ ok: false, error: attempts + 1 >= 5 ? 'too_many' : 'wrong_code' });
+  }
+
   cache.remove('code' + d);
-  var tok = Utilities.getUuid();
-  cache.put('tok' + tok, d, 3600);
-  return json_({ ok: true, token: tok, expiresIn: 3600 });
+  cache.remove(attemptKey);
+
+  var verificationToken = Utilities.getUuid() + Utilities.getUuid().replace(/-/g, '');
+  cache.put('tok' + verificationToken, d, 3600);
+  return json_({ ok: true, token: verificationToken, expiresIn: 3600 });
 }

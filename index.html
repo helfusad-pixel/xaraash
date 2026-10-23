@@ -407,6 +407,8 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
 <div class="veil" id="veil2" hidden><div class="sheet" id="sheet2" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast" hidden></div>
 
+<!-- config.js should contain only public endpoint URLs, never private API tokens.
+     Example: window.XARAASH_API_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec"; -->
 <script src="config.js"></script>
 <script>
 (function () {
@@ -1093,7 +1095,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     $('pf-send').parentNode.hidden = isVerified();
     if (isVerified()) { $('pf-coderow').hidden = true; vMsg(R('vOk'), true); } else if ($('pf-vmsg').className === 'ok') vMsg('');
   }
-  var VERR = { bad_phone: 'vIntl', wa_not_configured: 'vFail', too_many: 'vMany', send_failed: 'vFail', wrong_code: 'vWrong', expired: 'vExpired', invalid: 'vWrong' };
+  var VERR = { bad_phone: 'vIntl', wa_not_configured: 'vFail', too_many: 'vMany', wait_before_resend: 'vWait', send_failed: 'vFail', bad_template_mode: 'vFail', wrong_code: 'vWrong', expired: 'vExpired', invalid: 'vWrong', rate_limited: 'vMany' };
   $('pf-acct').addEventListener('change', refreshVerify);
   $('pf-phone').addEventListener('input', refreshVerify);
   $('pf-send').addEventListener('click', function () {
@@ -1186,6 +1188,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     vWrong: ['Koodhku waa khalad.', 'Wrong code.', 'Msimbo si sahihi.', 'ኮዱ ትክክል አይደለም።', 'Code incorrect.'],
     vExpired: ['Koodhku wuu dhacay. Codso mid cusub.', 'The code expired. Request a new one.', 'Msimbo umeisha muda. Omba mpya.', 'ኮዱ ጊዜው አልፏል። አዲስ ይጠይቁ።', 'Le code a expiré. Demandez-en un nouveau.'],
     vMany: ['Isku day aad u badan. Mar dambe isku day.', 'Too many tries. Try again later.', 'Majaribio mengi mno. Jaribu baadaye.', 'ብዙ ሙከራዎች። ቆይተው ይሞክሩ።', 'Trop d’essais. Réessayez plus tard.'],
+    vWait: ['Fadlan sug hal daqiiqo ka hor intaadan codsan koodh kale.', 'Please wait one minute before requesting another code.', 'Tafadhali subiri dakika moja kabla ya kuomba msimbo mwingine.', 'ሌላ ኮድ ከመጠየቅዎ በፊት አንድ ደቂቃ ይጠብቁ።', 'Veuillez attendre une minute avant de demander un autre code.'],
     vFail: ['Koodhka lama diri karo hadda (WhatsApp ma diyaar nin?). Isku day mar dambe.', 'Could not send the code now (is WhatsApp set up?). Try later.', 'Imeshindwa kutuma msimbo sasa (je, WhatsApp imewekwa?). Jaribu baadaye.', 'ኮዱን አሁን መላክ አልተቻለም (WhatsApp ተዘጋጅቷል?)። ቆይተው ይሞክሩ።', 'Envoi du code impossible (WhatsApp est-il configuré ?). Réessayez plus tard.'],
     need: ['Magaca, lambarka taleefanka iyo magaalada waa qasab.', 'Name, phone number and city are required.', 'Jina, namba ya simu na mji ni lazima.', 'ስም፣ ስልክ ቁጥርና ከተማ ግዴታ ናቸው።', 'Le nom, le téléphone et la ville sont obligatoires.'],
     pbad: ['Lambarku sax maaha.', 'That phone number is not valid.', 'Namba ya simu si sahihi.', 'ስልክ ቁጥሩ ትክክል አይደለም።', 'Ce numéro n’est pas valide.'],
@@ -1222,7 +1225,18 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     document.querySelectorAll('#loginBtn span, [data-tab="login"] span').forEach(function (el) { el.textContent = lbl; });
   }
   function postJSON(obj) {
-    return fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(obj) }).then(function (r) { return r.json(); });
+    var url = API();
+    if (!url) return Promise.reject(new Error('api_not_configured'));
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(obj)
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok || !data || typeof data !== 'object') throw new Error('api_request_failed');
+        return data;
+      });
+    });
   }
   function openProfile() {
     var c = savedContact();
@@ -1284,7 +1298,18 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   });
 
   /* ---------- Shared storage (Google Sheets + Drive through Apps Script) ---------- */
-  function API() { return (window.XARAASH_API_URL || '').trim(); }
+  // Public endpoint URL lives in config.js. Never put the WhatsApp access token here.
+  function API() {
+    var raw = window.XARAASH_API_URL || (window.XARAASH_CONFIG && window.XARAASH_CONFIG.apiUrl) || '';
+    var u = String(raw).trim();
+    if (!u || /PASTE_|YOUR_DEPLOYMENT_ID|YOUR_WEB_APP_URL|REPLACE_ME/i.test(u)) return '';
+    try {
+      var parsed = new URL(u);
+      if (parsed.protocol !== 'https:' || parsed.hostname !== 'script.google.com') return '';
+      if (!/^\/macros\/s\/[^/]+\/exec\/?$/.test(parsed.pathname)) return '';
+      return parsed.href;
+    } catch (e) { return ''; }
+  }
   async function shareRemote(post) {
     try {
       var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'add', token: post.token || '', acct: post.acct || 'person', title: post.title[0], cat: post.cat, city: post.city, priceUsd: post.price, name: post.user || '', phone: post.phone || '', photos: post.photos || [] }) });
@@ -1299,7 +1324,10 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   async function loadRemote() {
     var u = API(); if (!u) return;
     try {
-      var r = await fetch(u + (u.indexOf('?') >= 0 ? '&' : '?') + 'action=list');
+      var listUrl = new URL(u);
+      listUrl.searchParams.set('action', 'list');
+      var r = await fetch(listUrl.toString(), { cache: 'no-store' });
+      if (!r.ok) return;
       var d = await r.json();
       if (!d || !Array.isArray(d.posts)) return;
       var now = Date.now();
