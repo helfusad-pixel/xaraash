@@ -8,8 +8,8 @@
  */
 var SHEET_NAME = 'posts';
 var FOLDER_NAME = 'Xaraash photos';
-var HEADERS = ['id', 'createdAt', 'cat', 'city', 'priceUsd', 'title', 'user', 'photos', 'status', 'phone', 'editKey'];
-var COL = { id: 0, createdAt: 1, cat: 2, city: 3, priceUsd: 4, title: 5, user: 6, photos: 7, status: 8, phone: 9, editKey: 10 };
+var HEADERS = ['id', 'createdAt', 'cat', 'city', 'priceUsd', 'title', 'user', 'photos', 'status', 'phone', 'editKey', 'acct'];
+var COL = { id: 0, createdAt: 1, cat: 2, city: 3, priceUsd: 4, title: 5, user: 6, photos: 7, status: 8, phone: 9, editKey: 10, acct: 11 };
 var CATS = ['cars', 'devices', 'real', 'furniture', 'services', 'fashion', 'animals', 'jobs', 'games', 'coaching', 'food', 'gardens', 'tourism', 'trips', 'events', 'arts', 'coding', 'lost', 'projects'];
 var MAX_PHOTOS = 5;
 var MAX_PHOTO_CHARS = 700000;   // ~500 KB per photo after base64
@@ -56,7 +56,8 @@ function clean_(b, withPhotos) {
       if (typeof photos[i] !== 'string' || photos[i].indexOf('data:image/jpeg;base64,') !== 0 || photos[i].length > MAX_PHOTO_CHARS) return null;
     }
   }
-  return { title: title, cat: cat, city: city, price: price, name: name, phone: phone, photos: photos };
+  var acct = b.acct === 'company' ? 'company' : 'person';
+  return { acct: acct, title: title, cat: cat, city: city, price: price, name: name, phone: phone, photos: photos };
 }
 
 function findRow_(sh, id) {
@@ -81,7 +82,7 @@ function doGet(e) {
       var ids = [];
       try { ids = JSON.parse(r[COL.photos] || '[]'); } catch (x) { ids = []; }
       posts.push({ id: String(r[COL.id]), ts: new Date(r[COL.createdAt]).getTime(), cat: r[COL.cat], city: r[COL.city],
-        priceUsd: r[COL.priceUsd] === '' ? null : Number(r[COL.priceUsd]), title: r[COL.title], user: r[COL.user], phone: r[COL.phone] || '', photos: ids });
+        priceUsd: r[COL.priceUsd] === '' ? null : Number(r[COL.priceUsd]), title: r[COL.title], user: r[COL.user], phone: r[COL.phone] || '', acct: r[COL.acct] === 'company' ? 'company' : 'person', photos: ids });
     }
     return json_({ ok: true, posts: posts });  // editKey is never sent
   } catch (err) {
@@ -95,13 +96,16 @@ function doPost(e) {
     lock.waitLock(10000);
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     var action = body.action;
-    if (['add', 'update', 'delete', 'report', 'rate'].indexOf(action) < 0) return json_({ ok: false, error: 'bad_action' });
+    if (['add', 'update', 'delete', 'report', 'rate', 'sendCode', 'verifyCode'].indexOf(action) < 0) return json_({ ok: false, error: 'bad_action' });
 
     var cache = CacheService.getScriptCache();
     var key = 'rl' + Math.floor(Date.now() / 60000);
     var n = Number(cache.get(key) || 0);
     if (n >= MAX_WRITES_PER_MINUTE) return json_({ ok: false, error: 'rate_limited' });
     cache.put(key, String(n + 1), 120);
+
+    if (action === 'sendCode') return sendCode_(body.phone);
+    if (action === 'verifyCode') return verifyCode_(body.phone, body.code);
 
     if (action === 'report' || action === 'rate') {
       var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -126,7 +130,9 @@ function doPost(e) {
 
     if (action === 'add') {
       var p = clean_(body, true);
-      if (!p) return json_({ ok: false, error: 'invalid' });
+      if (!p || !p.name || !p.city || !p.phone) return json_({ ok: false, error: 'invalid' });
+      var pd = digits_(p.phone);
+      if (!pd || cache.get('tok' + String(body.token || '')) !== pd) return json_({ ok: false, error: 'unverified' });
       var id = Utilities.getUuid().slice(0, 8), editKey = Utilities.getUuid(), ids = [];
       if (p.photos.length) {
         var f = folder_();
@@ -137,7 +143,7 @@ function doPost(e) {
           ids.push(file.getId());
         }
       }
-      sh.appendRow([id, new Date(), p.cat, p.city, p.price, p.title, p.name || ('Member ' + id.slice(0, 4)), JSON.stringify(ids), 'visible', p.phone, editKey]);
+      sh.appendRow([id, new Date(), p.cat, p.city, p.price, p.title, p.name || ('Member ' + id.slice(0, 4)), JSON.stringify(ids), 'visible', p.phone, editKey, p.acct]);
       return json_({ ok: true, id: id, editKey: editKey });
     }
 
@@ -154,13 +160,76 @@ function doPost(e) {
     var u = clean_(body, false);
     if (!u) return json_({ ok: false, error: 'invalid' });
     var name = u.name || String(sh.getRange(row, COL.user + 1).getValue() || '');
+    if (!u.city) return json_({ ok: false, error: 'invalid' });
     sh.getRange(row, COL.cat + 1, 1, 4).setValues([[u.cat, u.city, u.price, u.title]]);
     sh.getRange(row, COL.user + 1).setValue(name);
-    sh.getRange(row, COL.phone + 1).setValue(u.phone);
+    sh.getRange(row, COL.acct + 1).setValue(u.acct);
+    // the verified phone number of a post cannot be changed here
     return json_({ ok: true });
   } catch (err) {
     return json_({ ok: false, error: 'server_error' });
   } finally {
     try { lock.releaseLock(); } catch (x) {}
   }
+}
+
+
+// ---------- WhatsApp verification (Meta WhatsApp Cloud API) ----------
+// Script properties to set (Project settings > Script properties):
+//   WA_TOKEN     permanent access token
+//   WA_PHONE_ID  the "Phone number ID" of your WhatsApp sender
+//   WA_TEMPLATE  approved authentication template name (default xaraash_code)
+//   WA_LANG      template language code (default en)
+function digits_(v) {
+  var d = String(v || '').replace(/\D/g, '');
+  return d.length >= 8 && d.length <= 15 ? d : '';
+}
+function hash_(code, phone) {
+  var props = PropertiesService.getScriptProperties();
+  var salt = props.getProperty('SALT');
+  if (!salt) { salt = Utilities.getUuid(); props.setProperty('SALT', salt); }
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + ':' + phone + ':' + code);
+  return bytes.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
+}
+function sendCode_(phone) {
+  var d = digits_(phone);
+  if (!d) return json_({ ok: false, error: 'bad_phone' });
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty('WA_TOKEN'), pid = props.getProperty('WA_PHONE_ID');
+  if (!token || !pid) return json_({ ok: false, error: 'wa_not_configured' });
+  var cache = CacheService.getScriptCache();
+  var hk = 'sc' + d + Math.floor(Date.now() / 3600000), hn = Number(cache.get(hk) || 0);
+  if (hn >= 3) return json_({ ok: false, error: 'too_many' });
+  var code = ('00000' + (parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 8), 16) % 1000000)).slice(-6);
+  var res = UrlFetchApp.fetch('https://graph.facebook.com/v20.0/' + pid + '/messages', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    headers: { Authorization: 'Bearer ' + token },
+    payload: JSON.stringify({
+      messaging_product: 'whatsapp', to: d, type: 'template',
+      template: { name: props.getProperty('WA_TEMPLATE') || 'xaraash_code', language: { code: props.getProperty('WA_LANG') || 'en' },
+        components: [
+          { type: 'body', parameters: [{ type: 'text', text: code }] },
+          { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: code }] }
+        ] }
+    })
+  });
+  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) return json_({ ok: false, error: 'send_failed' });
+  cache.put(hk, String(hn + 1), 3700);
+  cache.put('code' + d, hash_(code, d), 600);
+  cache.remove('att' + d);
+  return json_({ ok: true });
+}
+function verifyCode_(phone, code) {
+  var d = digits_(phone), c = String(code || '').replace(/\D/g, '');
+  if (!d || c.length !== 6) return json_({ ok: false, error: 'invalid' });
+  var cache = CacheService.getScriptCache();
+  var att = Number(cache.get('att' + d) || 0);
+  if (att >= 5) return json_({ ok: false, error: 'too_many' });
+  var stored = cache.get('code' + d);
+  if (!stored) return json_({ ok: false, error: 'expired' });
+  if (stored !== hash_(c, d)) { cache.put('att' + d, String(att + 1), 600); return json_({ ok: false, error: 'wrong_code' }); }
+  cache.remove('code' + d);
+  var tok = Utilities.getUuid();
+  cache.put('tok' + tok, d, 3600);
+  return json_({ ok: true, token: tok, expiresIn: 3600 });
 }

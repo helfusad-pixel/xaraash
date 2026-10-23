@@ -185,6 +185,11 @@ button { cursor: pointer; }
 .qa { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; background: var(--surface-2); }
 .qa summary { font-weight: 700; cursor: pointer; }
 .qa p { margin: 8px 0 0; }
+.vrow { display: flex; gap: 8px; margin-top: 6px; }
+.vrow input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--surface-2); border-radius: 10px; padding: 11px 12px; }
+.vrow .ghost { padding: 10px 14px; }
+#pf-vmsg { font-weight: 600; min-height: 1.2em; }
+#pf-vmsg.ok { color: #1b8a4b; }
 .stars { display: flex; gap: 6px; margin: 8px 0 12px; }
 .stars button { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; font-size: 1.5rem; line-height: 1; padding: 8px 10px; color: var(--muted, #8a94a6); }
 .stars button[aria-pressed="true"] { color: #f5a623; border-color: #f5a623; }
@@ -375,10 +380,11 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   <form class="sheet" id="postForm" role="dialog" aria-modal="true" aria-labelledby="pf-h">
     <h2 id="pf-h" data-i="add"></h2>
     <label class="field"><span data-i="fTitle"></span><input id="pf-title" required maxlength="80"></label>
-    <label class="field"><span data-i="fName"></span><input id="pf-name" maxlength="40" autocomplete="name"></label>
-    <label class="field"><span data-i="fPhone"></span><input id="pf-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="+252 …"></label>
+    <label class="field"><span data-i="fAcct"></span><select id="pf-acct"><option value="person"></option><option value="company"></option></select></label>
+    <label class="field"><span id="pf-name-l"></span><input id="pf-name" required maxlength="40" autocomplete="name"></label>
+    <div class="field"><span data-i="fPhone"></span><input id="pf-phone" required type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="+252 …"><div class="vrow"><button type="button" class="ghost" id="pf-send"></button></div><div class="vrow" id="pf-coderow" hidden><input id="pf-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" aria-label="Code"><button type="button" class="ghost" id="pf-verify"></button></div><small id="pf-vmsg" role="status"></small></div>
     <label class="field"><span data-i="fCat"></span><select id="pf-cat"></select></label>
-    <label class="field"><span data-i="fCity"></span><select id="pf-city"></select></label>
+    <label class="field"><span data-i="fCity"></span><select id="pf-city" required></select></label>
     <div class="field" id="pf-photos-field"><span data-i="fPhotos"></span><div class="photobtns"><label class="ghost pbtn"><input id="pf-cam" class="vh" type="file" accept="image/*" capture="environment"><span data-i="takePhoto"></span></label><label class="ghost pbtn"><input id="pf-gal" class="vh" type="file" accept="image/*" multiple><span data-i="pickPhoto"></span></label></div><div class="pthumbs" id="pf-thumbs"></div><small class="conv" id="pf-pmsg" aria-live="polite"></small></div>
     <div class="field"><span data-i="fPrice"></span><div class="pricerow"><input id="pf-price" type="number" min="0" step="any" inputmode="decimal" aria-label="Price"><select id="pf-cur" aria-label="Currency"></select></div><small class="conv" id="pf-conv"></small></div>
     <div class="acts"><button type="button" class="ghost" id="pf-cancel" data-i="cancel"></button><button type="submit" class="post" id="pf-submit" data-i="publish"></button></div>
@@ -472,7 +478,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
       tg: { parts:'Qaybaha', trucks:'Baabuur & rootooyin', moto:'Mootooyin', classic:'Kuwa hore', crashed:'Burbursan', lease:'Kiro', sheep:'Ido', goat:'Riyo', camel:'Geel', cow:'Lo’', horse:'Fardo', cat:'Bisado', chicken:'Digaag', land:'Dhul iib ah', house:'Guryo iib ah', rent:'Guryo kiro ah', shop:'Dukaamo' },
       dl1: 'Ka soo deg', dl2: 'Ka hel', dl3: 'Ka baar', applangs: 'App-ka Xaraash: Soomaali · English · Kiswahili · አማርኛ · Français',
       tagline: 'Xaraash, suuqa Bariga Afrika oo dhan', stripA: 'Iibso, iibi, kala xiriir.', stripB: 'Suuq furan oo ka dhex shaqeeya Soomaaliya, Kenya, Tansaaniya, Ugaanda, Itoobiya, Jabuuti iyo Rwanda.', 
-      fTitle: 'Cinwaanka xayeysiiska', fCat: 'Qaybta', fCity: 'Magaalada', fPrice: 'Qiimaha (ikhtiyaari)', cancel: 'Jooji', publish: 'Daabac',
+      fTitle: 'Cinwaanka xayeysiiska', fCat: 'Qaybta', fCity: 'Magaalada *', fPrice: 'Qiimaha (ikhtiyaari)', cancel: 'Jooji', publish: 'Daabac',
       added: 'Xayeysiiskaaga waxaa lagu daray bogga kaliya. Ma la keydin.', soon: 'Qaybtan way soo socotaa.', loginSoon: 'Gelitaanka way soo socotaa.',
       legal: 'Xaraash · Nooca 0.1 · 2026-10-20', sample: 'Xayeysiisyada hoose waa tusaalayaal, ma aha kuwo dhab ah.',
       links: ['Isdiiwaangeli','Kordhi aragtida xayeysiiska','Shatiga','Dhimis','Su’aalaha','Nala soo xiriir','Komishanka bogga','Shuruudaha & xaaladaha','Xarunta badbaadada','Akoonno & lambarro la hakiyay','Siyaasadda gaarka ah','Xubinnimada iibiyeyaasha','Adeegga iibsiga aaminka ah','Qiimeyn','Alaabta mamnuuc ah','Siyaasadda hantida maskaxda']
@@ -486,7 +492,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
       tg: { parts:'Parts', trucks:'Trucks & vans', moto:'Motorcycles', classic:'Classic', crashed:'Crashed', lease:'For lease', sheep:'Sheep', goat:'Goats', camel:'Camels', cow:'Cattle', horse:'Horses', cat:'Cats', chicken:'Chickens', land:'Land for sale', house:'Houses for sale', rent:'For rent', shop:'Shops' },
       dl1: 'Download on the', dl2: 'Get it on', dl3: 'Explore it on', applangs: 'Xaraash app: Soomaali · English · Kiswahili · አማርኛ · Français',
       tagline: 'Xaraash, the marketplace for all of East Africa', stripA: 'Buy, sell, connect.', stripB: 'An open market across Somalia, Kenya, Tanzania, Uganda, Ethiopia, Djibouti and Rwanda.',
-      fTitle: 'Post title', fCat: 'Category', fCity: 'City', fPrice: 'Price (optional)', cancel: 'Cancel', publish: 'Publish',
+      fTitle: 'Post title', fCat: 'Category', fCity: 'City *', fPrice: 'Price (optional)', cancel: 'Cancel', publish: 'Publish',
       added: 'Your post was added to this page only. It is not saved.', soon: 'This section is coming soon.', loginSoon: 'Login is coming soon.',
       legal: 'Xaraash · Version 0.1 · 2026-10-20', sample: 'The posts below are examples, not real listings.',
       links: ['Register','Increase ad views','License','Discount','FAQ','Contact','Website commission','Terms & conditions','Safety center','Suspended accounts and numbers','Privacy policy','Dealer & agency membership','Trusted purchase service','Rating','Prohibited items','Intellectual property policy']
@@ -500,7 +506,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
       tg: { parts:'Vipuri', trucks:'Malori & vani', moto:'Pikipiki', classic:'Ya zamani', crashed:'Yaliyoharibika', lease:'Kukodisha', sheep:'Kondoo', goat:'Mbuzi', camel:'Ngamia', cow:'Ng’ombe', horse:'Farasi', cat:'Paka', chicken:'Kuku', land:'Ardhi inauzwa', house:'Nyumba zinauzwa', rent:'Za kupangisha', shop:'Maduka' },
       dl1: 'Pakua kwenye', dl2: 'Pata kwenye', dl3: 'Gundua kwenye', applangs: 'Programu ya Xaraash: Soomaali · English · Kiswahili · አማርኛ · Français',
       tagline: 'Xaraash, soko la Afrika Mashariki yote', stripA: 'Nunua, uza, ungana.', stripB: 'Soko huru kote Somalia, Kenya, Tanzania, Uganda, Ethiopia, Djibouti na Rwanda.',
-      fTitle: 'Kichwa cha tangazo', fCat: 'Kategoria', fCity: 'Mji', fPrice: 'Bei (hiari)', cancel: 'Ghairi', publish: 'Chapisha',
+      fTitle: 'Kichwa cha tangazo', fCat: 'Kategoria', fCity: 'Mji *', fPrice: 'Bei (hiari)', cancel: 'Ghairi', publish: 'Chapisha',
       added: 'Tangazo lako limeongezwa kwenye ukurasa huu tu. Halijahifadhiwa.', soon: 'Sehemu hii inakuja hivi karibuni.', loginSoon: 'Kuingia kunakuja hivi karibuni.',
       legal: 'Xaraash · Toleo 0.1 · 2026-10-20', sample: 'Matangazo hapa chini ni mifano, si ya kweli.',
       links: ['Jisajili','Ongeza watazamaji wa tangazo','Leseni','Punguzo','Maswali ya mara kwa mara','Wasiliana nasi','Kamisheni ya tovuti','Masharti na vigezo','Kituo cha usalama','Akaunti na namba zilizositishwa','Sera ya faragha','Uanachama wa wauzaji','Huduma ya ununuzi unaoaminika','Ukadiriaji','Bidhaa zilizopigwa marufuku','Sera ya mali miliki']
@@ -516,7 +522,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     tg: { parts:'መለዋወጫ', trucks:'ጭነት መኪናዎችና ቫኖች', moto:'ሞተር ሳይክሎች', classic:'ክላሲክ', crashed:'የተጋጩ', lease:'ለኪራይ', sheep:'በጎች', goat:'ፍየሎች', camel:'ግመሎች', cow:'ከብቶች', horse:'ፈረሶች', cat:'ድመቶች', chicken:'ዶሮዎች', land:'መሬት ለሽያጭ', house:'ቤቶች ለሽያጭ', rent:'ለኪራይ', shop:'ሱቆች' },
     dl1: 'አውርድ በ', dl2: 'ያግኙት በ', dl3: 'ያስሱ በ', applangs: 'Xaraash መተግበሪያ፡ Soomaali · English · Kiswahili · አማርኛ · Français',
     tagline: 'Xaraash፣ የመላው ምስራቅ አፍሪካ ገበያ', stripA: 'ግዙ፣ ሽጡ፣ ተገናኙ።', stripB: 'በሶማሊያ፣ ኬንያ፣ ታንዛኒያ፣ ዩጋንዳ፣ ኢትዮጵያ፣ ጅቡቲና ሩዋንዳ የተከፈተ ገበያ።',
-    fTitle: 'የማስታወቂያ ርዕስ', fCat: 'ምድብ', fCity: 'ከተማ', fPrice: 'ዋጋ (አማራጭ)', cancel: 'ተወው', publish: 'ለጥፍ',
+    fTitle: 'የማስታወቂያ ርዕስ', fCat: 'ምድብ', fCity: 'ከተማ *', fPrice: 'ዋጋ (አማራጭ)', cancel: 'ተወው', publish: 'ለጥፍ',
     added: 'ማስታወቂያዎ በዚህ ገጽ ላይ ብቻ ተጨምሯል። አልተቀመጠም።', soon: 'ይህ ክፍል በቅርቡ ይመጣል።', loginSoon: 'መግቢያ በቅርቡ ይመጣል።',
     legal: 'Xaraash · ስሪት 0.1 · 2026-10-20', sample: 'ከታች ያሉት ማስታወቂያዎች ምሳሌዎች ናቸው፣ እውነተኛ አይደሉም።',
     links: ['ይመዝገቡ','የማስታወቂያ እይታ ይጨምሩ','ፈቃድ','ቅናሽ','ተደጋጋሚ ጥያቄዎች','ያግኙን','የድረገጽ ኮሚሽን','ውሎችና ሁኔታዎች','የደህንነት ማዕከል','የታገዱ መለያዎችና ቁጥሮች','የግላዊነት ፖሊሲ','የነጋዴዎችና ኤጀንሲዎች አባልነት','የታመነ ግዢ አገልግሎት','ደረጃ መስጠት','የተከለከሉ ዕቃዎች','የአእምሯዊ ንብረት ፖሊሲ']
@@ -530,7 +536,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     tg: { parts:'Pièces', trucks:'Camions et fourgons', moto:'Motos', classic:'De collection', crashed:'Accidentées', lease:'En location', sheep:'Moutons', goat:'Chèvres', camel:'Chameaux', cow:'Bovins', horse:'Chevaux', cat:'Chats', chicken:'Poules', land:'Terrains à vendre', house:'Maisons à vendre', rent:'À louer', shop:'Boutiques' },
     dl1: 'Télécharger sur', dl2: 'Disponible sur', dl3: 'Découvrir sur', applangs: 'Appli Xaraash : Soomaali · English · Kiswahili · አማርኛ · Français',
     tagline: 'Xaraash, la place de marché de toute l’Afrique de l’Est', stripA: 'Achetez, vendez, connectez-vous.', stripB: 'Un marché ouvert en Somalie, au Kenya, en Tanzanie, en Ouganda, en Éthiopie, à Djibouti et au Rwanda.',
-    fTitle: 'Titre de l’annonce', fCat: 'Catégorie', fCity: 'Ville', fPrice: 'Prix (facultatif)', cancel: 'Annuler', publish: 'Publier',
+    fTitle: 'Titre de l’annonce', fCat: 'Catégorie', fCity: 'Ville *', fPrice: 'Prix (facultatif)', cancel: 'Annuler', publish: 'Publier',
     added: 'Votre annonce a été ajoutée à cette page uniquement. Elle n’est pas enregistrée.', soon: 'Cette section arrive bientôt.', loginSoon: 'La connexion arrive bientôt.',
     legal: 'Xaraash · Version 0.1 · 2026-10-20', sample: 'Les annonces ci-dessous sont des exemples, pas de vraies annonces.',
     links: ['Inscription','Augmenter les vues','Licence','Remise','FAQ','Contact','Commission du site','Conditions générales','Centre de sécurité','Comptes et numéros suspendus','Politique de confidentialité','Adhésion des concessionnaires et agences','Service d’achat de confiance','Évaluation','Articles interdits','Politique de propriété intellectuelle']
@@ -562,11 +568,11 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   };
   Object.keys(NEWS).forEach(function (k) { Object.assign(T[k], NEWS[k]); });
   var NEWC = {
-    so: { fName: 'Magacaaga (ikhtiyaari)', fPhone: 'Lambarka taleefanka (ikhtiyaari)', editPost: 'Wax ka beddel xayeysiiska', save: 'Keydi', edit: 'Wax ka beddel', del: 'Tirtir', delSure: 'Hubi tirtirka', call: 'Wac', whatsapp: 'WhatsApp', phoneLbl: 'Taleefan', saved: 'Isbeddelka waa la keydiyay.', saveFail: 'Lama keydin karin isbeddelka. Isku day mar kale.', deleted: 'Xayeysiiska waa la tirtiray.' },
-    en: { fName: 'Your name (optional)', fPhone: 'Phone number (optional)', editPost: 'Edit post', save: 'Save', edit: 'Edit', del: 'Delete', delSure: 'Confirm delete', call: 'Call', whatsapp: 'WhatsApp', phoneLbl: 'Phone', saved: 'Changes saved.', saveFail: 'Could not save the changes. Try again.', deleted: 'Post deleted.' },
-    sw: { fName: 'Jina lako (hiari)', fPhone: 'Namba ya simu (hiari)', editPost: 'Hariri tangazo', save: 'Hifadhi', edit: 'Hariri', del: 'Futa', delSure: 'Thibitisha kufuta', call: 'Piga simu', whatsapp: 'WhatsApp', phoneLbl: 'Simu', saved: 'Mabadiliko yamehifadhiwa.', saveFail: 'Imeshindwa kuhifadhi mabadiliko. Jaribu tena.', deleted: 'Tangazo limefutwa.' },
-    am: { fName: 'ስምዎ (አማራጭ)', fPhone: 'ስልክ ቁጥር (አማራጭ)', editPost: 'ማስታወቂያ አርም', save: 'አስቀምጥ', edit: 'አርም', del: 'ሰርዝ', delSure: 'መሰረዝን አረጋግጥ', call: 'ደውል', whatsapp: 'WhatsApp', phoneLbl: 'ስልክ', saved: 'ለውጦች ተቀምጠዋል።', saveFail: 'ለውጦቹን ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ።', deleted: 'ማስታወቂያው ተሰርዟል።' },
-    fr: { fName: 'Votre nom (facultatif)', fPhone: 'Numéro de téléphone (facultatif)', editPost: 'Modifier l’annonce', save: 'Enregistrer', edit: 'Modifier', del: 'Supprimer', delSure: 'Confirmer la suppression', call: 'Appeler', whatsapp: 'WhatsApp', phoneLbl: 'Téléphone', saved: 'Modifications enregistrées.', saveFail: 'Impossible d’enregistrer les modifications. Réessayez.', deleted: 'Annonce supprimée.' }
+    so: { fName: 'Magacaaga *', fPhone: 'Lambarka taleefanka *', editPost: 'Wax ka beddel xayeysiiska', save: 'Keydi', edit: 'Wax ka beddel', del: 'Tirtir', delSure: 'Hubi tirtirka', call: 'Wac', whatsapp: 'WhatsApp', phoneLbl: 'Taleefan', saved: 'Isbeddelka waa la keydiyay.', saveFail: 'Lama keydin karin isbeddelka. Isku day mar kale.', deleted: 'Xayeysiiska waa la tirtiray.' },
+    en: { fName: 'Your name *', fPhone: 'Phone number *', editPost: 'Edit post', save: 'Save', edit: 'Edit', del: 'Delete', delSure: 'Confirm delete', call: 'Call', whatsapp: 'WhatsApp', phoneLbl: 'Phone', saved: 'Changes saved.', saveFail: 'Could not save the changes. Try again.', deleted: 'Post deleted.' },
+    sw: { fName: 'Jina lako *', fPhone: 'Namba ya simu *', editPost: 'Hariri tangazo', save: 'Hifadhi', edit: 'Hariri', del: 'Futa', delSure: 'Thibitisha kufuta', call: 'Piga simu', whatsapp: 'WhatsApp', phoneLbl: 'Simu', saved: 'Mabadiliko yamehifadhiwa.', saveFail: 'Imeshindwa kuhifadhi mabadiliko. Jaribu tena.', deleted: 'Tangazo limefutwa.' },
+    am: { fName: 'ስምዎ *', fPhone: 'ስልክ ቁጥር *', editPost: 'ማስታወቂያ አርም', save: 'አስቀምጥ', edit: 'አርም', del: 'ሰርዝ', delSure: 'መሰረዝን አረጋግጥ', call: 'ደውል', whatsapp: 'WhatsApp', phoneLbl: 'ስልክ', saved: 'ለውጦች ተቀምጠዋል።', saveFail: 'ለውጦቹን ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ።', deleted: 'ማስታወቂያው ተሰርዟል።' },
+    fr: { fName: 'Votre nom *', fPhone: 'Numéro de téléphone *', editPost: 'Modifier l’annonce', save: 'Enregistrer', edit: 'Modifier', del: 'Supprimer', delSure: 'Confirmer la suppression', call: 'Appeler', whatsapp: 'WhatsApp', phoneLbl: 'Téléphone', saved: 'Modifications enregistrées.', saveFail: 'Impossible d’enregistrer les modifications. Réessayez.', deleted: 'Annonce supprimée.' }
   };
   Object.keys(NEWC).forEach(function (k) { Object.assign(T[k], NEWC[k]); });
 
@@ -691,7 +697,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     $('region').innerHTML = '<option value="">' + esc(x.allRegions) + '</option>' + cityOpts(S.region);
     $('region').setAttribute('aria-label', x.region);
     var pc = $('pf-city').value;
-    $('pf-city').innerHTML = cityOpts(pc || 'Muqdisho');
+    $('pf-city').innerHTML = '<option value="" disabled selected>—</option>' + cityOpts(''); $('pf-city').value = pc || '';
     $('cur').innerHTML = '<option value="auto">' + esc(x.curAuto) + '</option>' + Object.keys(CUR).map(function (c) { return '<option>' + c + '</option>'; }).join('');
     $('cur').value = S.cur;
     var pcu = $('pf-cur').value;
@@ -713,7 +719,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     renderRail(); renderSide(); renderRegion(); renderList(); renderView();
     $('langSel').value = S.lang;
     $('ratesLine').textContent = x.ratesLbl + ' (' + RATES_DATE + '): 1 USD = ' + ['ETB','KES','TZS','UGX','RWF','DJF'].map(function (c) { return CUR[c].r.toLocaleString('en-US') + ' ' + c; }).join(' · ');
-    renderQuick(); refreshHello(); refreshLogin();
+    renderQuick(); refreshHello(); refreshLogin(); refreshVerify();
   }
 
   var tt;
@@ -745,15 +751,17 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   $('postForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var title = $('pf-title').value.trim(); if (!title) return;
+    if (!editing && (!API() || !isVerified())) { toast(!API() ? R('vNoApi') : R('vNeed')); vMsg(!API() ? R('vNoApi') : R('vNeed')); return; }
+    if (!$('pf-name').value.trim() || !cleanPhone($('pf-phone').value) || !$('pf-city').value) { toast(R('need')); return; }
     var pr = $('pf-price').value, pcode = $('pf-cur').value, usd = pr === '' ? null : Math.round(Number(pr) / CUR[pcode].r * 100) / 100;
     var cname = $('pf-name').value.trim().slice(0, 40), cphone = cleanPhone($('pf-phone').value);
     try { localStorage.setItem('xaraash-contact', JSON.stringify({ name: cname, phone: cphone })); } catch (er) {}
     if (editing) {
       var rid0 = editing; closeForm();
-      updateRemote(rid0, { title: title, cat: $('pf-cat').value, city: $('pf-city').value, priceUsd: usd, name: cname, phone: cphone });
+      updateRemote(rid0, { acct: $('pf-acct').value, title: title, cat: $('pf-cat').value, city: $('pf-city').value, priceUsd: usd, name: cname, phone: cphone });
       return;
     }
-    var post = { id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: cname, phone: cphone, re: 0, age: 0, title: [title, title, title], mine: true, photos: photos.slice() };
+    var post = { id: 'm' + Date.now(), cat: $('pf-cat').value, tag: '', city: $('pf-city').value, price: usd, user: cname, phone: cphone, re: 0, age: 0, title: [title, title, title], acct: $('pf-acct').value, token: (ver() || {}).token, mine: true, photos: photos.slice() };
     S.mine.unshift(post);
     $('postForm').reset(); photos = []; renderPhotos(); closeForm(); S.cat = 'all'; S.tag = ''; S.region = ''; S.sort = 'new';
     $('sortNew').setAttribute('aria-pressed', 'true'); $('sortCheap').setAttribute('aria-pressed', 'false');
@@ -1011,7 +1019,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   function renderDetail(id) {
     var li = LI(), x = X[S.lang], all = allPosts(), p = all.filter(function (q) { return String(q.id) === id; })[0];
     if (!p) { nav(''); return; }
-    var who = p.mine ? t().you : p.user;
+    var who = (p.mine ? t().you : p.user) + (p.acct === 'company' ? ' · ' + R('company') : '');
     var pq = p.price == null ? null : priceParts(p);
     var price = !pq ? t().neg : pq.main + (pq.sec ? '  (≈ ' + pq.sec + ')' : '');
     var sim = all.filter(function (q) { return q.cat === p.cat && q.id !== p.id; }).slice(0, 4);
@@ -1070,6 +1078,42 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     if (!p.rid || !getKeys()[p.rid]) return '';
     return '<button class="ghost" type="button" data-edit="' + esc(p.rid) + '">' + esc(t().edit) + '</button><button class="ghost danger" type="button" data-del="' + esc(p.rid) + '">' + esc(t().del) + '</button>';
   }
+  function ver() { var v = lsGet('xaraash-ver', null); return v && v.exp > Date.now() ? v : null; }
+  function phoneDigits() { return $('pf-phone').value.replace(/\D/g, ''); }
+  function isVerified() { var v = ver(); return !!(v && v.phone === phoneDigits()); }
+  function vMsg(txt, ok) { var m = $('pf-vmsg'); m.textContent = txt || ''; m.className = ok ? 'ok' : ''; }
+  function refreshVerify() {
+    var c = $('pf-acct').value === 'company';
+    $('pf-name-l').textContent = c ? R('nCompany') : R('nPerson');
+    $('pf-acct').options[0].textContent = R('person'); $('pf-acct').options[1].textContent = R('company');
+    $('pf-send').textContent = R('vSend'); $('pf-verify').textContent = R('vCheck'); $('pf-code').placeholder = R('vCode');
+    var ed = !!editing;
+    $('pf-send').parentNode.hidden = ed; $('pf-phone').readOnly = ed;
+    if (ed) { $('pf-coderow').hidden = true; vMsg(''); return; }
+    $('pf-send').parentNode.hidden = isVerified();
+    if (isVerified()) { $('pf-coderow').hidden = true; vMsg(R('vOk'), true); } else if ($('pf-vmsg').className === 'ok') vMsg('');
+  }
+  var VERR = { bad_phone: 'vIntl', wa_not_configured: 'vFail', too_many: 'vMany', send_failed: 'vFail', wrong_code: 'vWrong', expired: 'vExpired', invalid: 'vWrong' };
+  $('pf-acct').addEventListener('change', refreshVerify);
+  $('pf-phone').addEventListener('input', refreshVerify);
+  $('pf-send').addEventListener('click', function () {
+    var ph = $('pf-phone').value.trim();
+    if (ph.charAt(0) !== '+' || !cleanPhone(ph)) { vMsg(R('vIntl')); return; }
+    if (!API()) { vMsg(R('vNoApi')); return; }
+    var b = $('pf-send'); b.disabled = true;
+    postJSON({ action: 'sendCode', phone: ph }).then(function (d) {
+      b.disabled = false;
+      if (d && d.ok) { $('pf-coderow').hidden = false; $('pf-code').focus(); vMsg(R('vSent')); } else vMsg(R(VERR[d && d.error] || 'vFail'));
+    }).catch(function () { b.disabled = false; vMsg(R('vFail')); });
+  });
+  $('pf-verify').addEventListener('click', function () {
+    var c = $('pf-code').value.replace(/\D/g, '');
+    if (c.length !== 6) { vMsg(R('vWrong')); return; }
+    postJSON({ action: 'verifyCode', phone: $('pf-phone').value.trim(), code: c }).then(function (d) {
+      if (d && d.ok && d.token) { lsSet('xaraash-ver', { phone: phoneDigits(), token: d.token, exp: Date.now() + (d.expiresIn || 3600) * 1000 - 60000 }); refreshVerify(); }
+      else vMsg(R(VERR[d && d.error] || 'vWrong'));
+    }).catch(function () { vMsg(R('vFail')); });
+  });
   function openForm(p) {
     editing = p && p.rid ? p.rid : null;
     $('postForm').reset(); photos = []; renderPhotos(); $('pf-pmsg').textContent = '';
@@ -1080,19 +1124,20 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     if (editing) {
       $('pf-title').value = p.title[0]; $('pf-cat').value = p.cat; $('pf-city').value = p.city;
       $('pf-cur').value = 'USD'; $('pf-price').value = p.price == null ? '' : p.price;
-      $('pf-name').value = p.user || ''; $('pf-phone').value = p.phone || '';
+      $('pf-name').value = p.user || ''; $('pf-phone').value = p.phone || ''; $('pf-acct').value = p.acct === 'company' ? 'company' : 'person';
     } else {
-      var c = savedContact(); $('pf-name').value = c.name || ''; $('pf-phone').value = c.phone || '';
+      $('pf-name').value = ''; $('pf-phone').value = '';
       $('pf-cur').value = localCur($('pf-city').value);
     }
-    updateConv();
+    $('pf-coderow').hidden = true; vMsg(''); $('pf-code').value = '';
+    refreshVerify(); updateConv();
     $('veil').hidden = false; $('pf-title').focus();
   }
   function closeForm() { editing = null; $('veil').hidden = true; }
   async function updateRemote(rid, f) {
     var key = getKeys()[rid]; if (!key || !API()) { toast(t().saveFail); return; }
     try {
-      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'update', id: rid, key: key, title: f.title, cat: f.cat, city: f.city, priceUsd: f.priceUsd, name: f.name, phone: f.phone }) });
+      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'update', id: rid, key: key, acct: f.acct || 'person', title: f.title, cat: f.cat, city: f.city, priceUsd: f.priceUsd, name: f.name, phone: f.phone }) });
       var d = await r.json(); if (!d || !d.ok) throw new Error('x');
       await loadRemote(); renderView(); toast(t().saved);
     } catch (e) { toast(t().saveFail); }
@@ -1125,6 +1170,24 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
     psave: ['Keydi', 'Save', 'Hifadhi', 'አስቀምጥ', 'Enregistrer'],
     pout: ['Ka bax (tirtir xogta)', 'Sign out (clear data)', 'Ondoka (futa data)', 'ውጣ (ውሂብ አጽዳ)', 'Se déconnecter (effacer)'],
     pnote: ['Xogtan waxay ku jirtaa browser-kaaga oo keliya, waxayna ku buuxisaa foomka xayeysiiska.', 'This stays only in your browser and prefills your post form.', 'Hii hubaki kwenye kivinjari chako tu na hujaza fomu ya tangazo.', 'ይህ በአሳሽዎ ውስጥ ብቻ ይቆያል፣ የማስታወቂያ ቅጹንም ይሞላል።', 'Cela reste uniquement dans votre navigateur et préremplit le formulaire.'],
+    fAcct: ['Waxaad tahay', 'You are posting as', 'Unachapisha kama', 'የሚለጥፉት እንደ', 'Vous publiez en tant que'],
+    person: ['Qof', 'Person', 'Mtu binafsi', 'ግለሰብ', 'Particulier'],
+    company: ['Shirkad', 'Company', 'Kampuni', 'ድርጅት', 'Entreprise'],
+    nPerson: ['Magaca qofka *', 'Person’s name *', 'Jina la mtu *', 'የግለሰቡ ስም *', 'Nom de la personne *'],
+    nCompany: ['Magaca shirkadda *', 'Company name *', 'Jina la kampuni *', 'የድርጅቱ ስም *', 'Nom de l’entreprise *'],
+    vSend: ['Ii soo dir koodh WhatsApp', 'Send me a WhatsApp code', 'Nitumie msimbo wa WhatsApp', 'የWhatsApp ኮድ ላክልኝ', 'M’envoyer un code WhatsApp'],
+    vCode: ['Koodhka 6-ga lambar', '6-digit code', 'Msimbo wa tarakimu 6', 'ባለ6 አሃዝ ኮድ', 'Code à 6 chiffres'],
+    vCheck: ['Hubi', 'Verify', 'Thibitisha', 'አረጋግጥ', 'Vérifier'],
+    vSent: ['Koodh ayaa lagu soo diray WhatsApp. Geli.', 'A code was sent to your WhatsApp. Enter it.', 'Msimbo umetumwa kwa WhatsApp yako. Uingize.', 'ኮድ ወደ WhatsApp ተልኳል። ያስገቡት።', 'Un code a été envoyé sur WhatsApp. Saisissez-le.'],
+    vOk: ['✓ Lambarka waa la xaqiijiyay', '✓ Number verified', '✓ Namba imethibitishwa', '✓ ቁጥሩ ተረጋግጧል', '✓ Numéro vérifié'],
+    vNeed: ['Marka hore xaqiiji lambarkaaga WhatsApp si aad xayeysiis u soo dirto.', 'Verify your WhatsApp number first to post.', 'Thibitisha namba yako ya WhatsApp kwanza ili kuchapisha.', 'ለመለጠፍ መጀመሪያ የWhatsApp ቁጥርዎን ያረጋግጡ።', 'Vérifiez d’abord votre numéro WhatsApp pour publier.'],
+    vIntl: ['Lambarka ku qor koodhka dalka (tusaale +252…).', 'Enter the number with the country code (for example +252…).', 'Weka namba pamoja na msimbo wa nchi (mfano +252…).', 'ቁጥሩን ከአገር ኮድ ጋር ያስገቡ (ለምሳሌ +252…)።', 'Saisissez le numéro avec l’indicatif du pays (par exemple +252…).'],
+    vNoApi: ['Xaqiijinta waxay u baahan tahay kaydka wadaaga (Apps Script). Weli lama dhigin.', 'Verification needs the shared storage (Apps Script), which is not set up yet.', 'Uthibitisho unahitaji hifadhi ya pamoja (Apps Script), ambayo bado haijawekwa.', 'ማረጋገጫ የጋራ ማከማቻ (Apps Script) ያስፈልገዋል፤ እስካሁን አልተዘጋጀም።', 'La vérification nécessite le stockage partagé (Apps Script), pas encore configuré.'],
+    vWrong: ['Koodhku waa khalad.', 'Wrong code.', 'Msimbo si sahihi.', 'ኮዱ ትክክል አይደለም።', 'Code incorrect.'],
+    vExpired: ['Koodhku wuu dhacay. Codso mid cusub.', 'The code expired. Request a new one.', 'Msimbo umeisha muda. Omba mpya.', 'ኮዱ ጊዜው አልፏል። አዲስ ይጠይቁ።', 'Le code a expiré. Demandez-en un nouveau.'],
+    vMany: ['Isku day aad u badan. Mar dambe isku day.', 'Too many tries. Try again later.', 'Majaribio mengi mno. Jaribu baadaye.', 'ብዙ ሙከራዎች። ቆይተው ይሞክሩ።', 'Trop d’essais. Réessayez plus tard.'],
+    vFail: ['Koodhka lama diri karo hadda (WhatsApp ma diyaar nin?). Isku day mar dambe.', 'Could not send the code now (is WhatsApp set up?). Try later.', 'Imeshindwa kutuma msimbo sasa (je, WhatsApp imewekwa?). Jaribu baadaye.', 'ኮዱን አሁን መላክ አልተቻለም (WhatsApp ተዘጋጅቷል?)። ቆይተው ይሞክሩ።', 'Envoi du code impossible (WhatsApp est-il configuré ?). Réessayez plus tard.'],
+    need: ['Magaca, lambarka taleefanka iyo magaalada waa qasab.', 'Name, phone number and city are required.', 'Jina, namba ya simu na mji ni lazima.', 'ስም፣ ስልክ ቁጥርና ከተማ ግዴታ ናቸው።', 'Le nom, le téléphone et la ville sont obligatoires.'],
     pbad: ['Lambarku sax maaha.', 'That phone number is not valid.', 'Namba ya simu si sahihi.', 'ስልክ ቁጥሩ ትክክል አይደለም።', 'Ce numéro n’est pas valide.'],
     psaved: ['Waa la keydiyay.', 'Saved.', 'Imehifadhiwa.', 'ተቀምጧል።', 'Enregistré.'],
     pcleared: ['Xogta waa la tirtiray.', 'Your data was cleared.', 'Data imefutwa.', 'ውሂቡ ጸድቷል።', 'Données effacées.'],
@@ -1224,8 +1287,9 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
   function API() { return (window.XARAASH_API_URL || '').trim(); }
   async function shareRemote(post) {
     try {
-      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'add', title: post.title[0], cat: post.cat, city: post.city, priceUsd: post.price, name: post.user || '', phone: post.phone || '', photos: post.photos || [] }) });
+      var r = await fetch(API(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'add', token: post.token || '', acct: post.acct || 'person', title: post.title[0], cat: post.cat, city: post.city, priceUsd: post.price, name: post.user || '', phone: post.phone || '', photos: post.photos || [] }) });
       var d = await r.json();
+      if (d && d.error === 'unverified') { try { localStorage.removeItem('xaraash-ver'); } catch (e2) {} toast(R('vNeed')); S.mine = S.mine.filter(function (m) { return m !== post; }); renderList(); return; }
       if (!d || !d.ok) throw new Error('rejected');
       if (d.id && d.editKey) setKey(d.id, d.editKey);
       S.mine = S.mine.filter(function (m) { return m !== post; });
@@ -1248,7 +1312,7 @@ a.ghost { padding: 12px 18px; color: var(--link); font-weight: 700; }
           phone: cleanPhone(p.phone),
           cat: CATS.indexOf(p.cat) > 0 ? p.cat : 'services',
           tag: '', city: String(p.city || '').slice(0, 40), price: isFinite(price) ? price : null,
-          user: String(p.user || 'Member').slice(0, 40), re: 0, mine: !!getKeys()[String(p.id).replace(/[^\w-]/g, '').slice(0, 20)],
+          user: String(p.user || 'Member').slice(0, 40), acct: p.acct === 'company' ? 'company' : 'person', re: 0, mine: !!getKeys()[String(p.id).replace(/[^\w-]/g, '').slice(0, 20)],
           age: Math.max(0, Math.round((now - Number(p.ts)) / 60000)) || 0,
           title: [title, title, title, title, title],
           photos: (Array.isArray(p.photos) ? p.photos : []).filter(function (x) { return /^[\w-]{10,80}$/.test(String(x)); }).slice(0, 5).map(function (x) { return 'https://drive.google.com/thumbnail?id=' + x + '&sz=w1000'; })

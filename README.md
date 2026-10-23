@@ -114,3 +114,13 @@ npx cap open ios
 ## Update (2026-10-23)
 So: Dhammaan badhamada hadda way shaqeeyaan (profile, soo sheeg, qiimeyn, rakib app, bogagga macluumaadka). Ku soo celi Code.gs Apps Script oo dooro Deploy > Manage deployments > New version.
 En: All buttons now work (profile, report, rating, install, info pages). Paste the new Code.gs into Apps Script and deploy a New version so report/rating are saved to your Sheet (tabs "reports" and "ratings").
+
+## WhatsApp verification / Xaqiijinta WhatsApp (2026-10-23)
+**So:** Qofka ma soo dhigi karo xayeysiis ilaa uu lambarkiisa ku xaqiijiyo koodh WhatsApp. Tijaabo bilaash ah: Meta WhatsApp Cloud API.
+1. developers.facebook.com > Create App (Business) > add **WhatsApp**. Waxaad heleysaa lambar tijaabo ah (test number) iyo ilaa 5 lambar oo aad ku darto "To" liiska.
+2. Ka qaado **Phone number ID** iyo **Access token** (u samee token joogto ah System User ahaan).
+3. WhatsApp Manager > Message templates > samee template nooca **Authentication** oo magaciisu yahay `xaraash_code` (luqad: English), ku sug ansixin.
+4. Apps Script > Project settings > **Script properties**: ku dar `WA_TOKEN`, `WA_PHONE_ID`, `WA_TEMPLATE` (xaraash_code), `WA_LANG` (en).
+5. Deploy > Manage deployments > Edit > **New version**.
+
+**En:** A visitor cannot publish until their number is verified by a 6-digit WhatsApp code (sent by the WhatsApp Cloud API through Apps Script; the code is stored hashed for 10 minutes, 3 sends per hour per number, 5 wrong tries). The free test number can only message up to 5 numbers you add as recipients; for the public you must verify your business with Meta. Message costs may apply after the free monthly allowance.
